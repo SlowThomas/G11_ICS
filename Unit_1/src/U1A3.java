@@ -1,5 +1,3 @@
-package Unit_1;
-
 import java.util.Scanner;
 
 public class U1A3 {

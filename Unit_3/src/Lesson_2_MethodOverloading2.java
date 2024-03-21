@@ -1,5 +1,3 @@
-package Unit_3;
-
 public class Lesson_2_MethodOverloading2 {
     public static int random(int x, int y){
         if(x > y) return x+y;

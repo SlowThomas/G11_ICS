@@ -1,5 +1,3 @@
-package Unit_1;
-
 public class Lesson_0_Introduction {
 
     // In codeHS, you're introduced to the 'run' method:

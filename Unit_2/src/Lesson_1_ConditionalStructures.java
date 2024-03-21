@@ -1,5 +1,3 @@
-package Unit_2;
-
 public class Lesson_1_ConditionalStructures {
     public static void main(String[] args){
         // Without running the program

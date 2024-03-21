@@ -1,5 +1,3 @@
-package Unit_1;
-
 public class Lesson_4_printf3 {
     public static void main(String[] args){
         // In the previous lesson, we've talked about:

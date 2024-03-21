@@ -1,5 +1,3 @@
-package Unit_1;
-
 public class Lesson_2_printf1 {
     public static void main(String[] args){
         // Q: What does the 'f' in printf stands for?

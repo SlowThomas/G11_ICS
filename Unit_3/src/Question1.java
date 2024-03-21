@@ -1,5 +1,3 @@
-package Unit_3;
-
 public class Question1 {
 
     // header

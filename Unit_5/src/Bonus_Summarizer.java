@@ -1,4 +1,3 @@
-package Unit_5;
 // TODO: Write comments
 import java.io.FileWriter;
 import java.util.Scanner;

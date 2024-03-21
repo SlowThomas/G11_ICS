@@ -1,4 +1,3 @@
-package Unit_1;
 // In CodeHS, user input is done through a file called ConsoleProgram.java
 // This file can be downloaded online (if you wish)
 

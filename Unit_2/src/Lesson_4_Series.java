@@ -1,5 +1,3 @@
-package Unit_2;
-
 public class Lesson_4_Series {
     public static void main(String[] args){
         // Question 1

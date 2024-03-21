@@ -1,4 +1,4 @@
-package Unit_4;
+
 /*
 * Cipher performs a simple encryption and decryption on a text file message.
 *

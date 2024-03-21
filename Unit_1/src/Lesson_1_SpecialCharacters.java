@@ -1,5 +1,3 @@
-package Unit_1;
-
 public class Lesson_1_SpecialCharacters {
     public static void main(String[] args){
         // Q1: How do I display the double quotation symbol in a sentence?

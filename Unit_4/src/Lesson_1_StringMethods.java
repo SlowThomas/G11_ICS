@@ -1,5 +1,3 @@
-package Unit_4;
-
 public class Lesson_1_StringMethods {
     public static void main(String[] args) {
         // The following list of methods are the only

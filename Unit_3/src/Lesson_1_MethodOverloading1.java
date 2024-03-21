@@ -1,4 +1,3 @@
-package Unit_3;
 // Method Overloading
 
 // The name of a method can be reused as long as the parameters are different

@@ -1,5 +1,3 @@
-package Unit_1;
-
 public class Lesson_3_printf2 {
     public static void main(String[] args){
         // Reserved Spacing

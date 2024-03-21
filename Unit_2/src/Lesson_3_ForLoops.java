@@ -1,5 +1,3 @@
-package Unit_2;
-
 public class Lesson_3_ForLoops {
     public static void main(String[] args){
         // for(______; ______; ______)

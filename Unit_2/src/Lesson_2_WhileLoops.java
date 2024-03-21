@@ -1,5 +1,3 @@
-package Unit_2;
-
 public class Lesson_2_WhileLoops {
 
     public static void main(String[] args){

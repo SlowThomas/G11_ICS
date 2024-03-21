@@ -1,5 +1,3 @@
-package Unit_1;
-
 // In this program we'll ask the user to continuously enter
 // POSITIVE INTEGERs
 // If the user enters a non-positive integer, the program

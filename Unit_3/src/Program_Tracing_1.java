@@ -1,5 +1,3 @@
-package Unit_3;
-
 public class Program_Tracing_1 {
     public static int m(int a, int b){
         int c = 0;
