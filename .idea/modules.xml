@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ICS.iml" filepath="$PROJECT_DIR$/ICS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/G11_ICS.iml" filepath="$PROJECT_DIR$/G11_ICS.iml" />
       <module fileurl="file://$PROJECT_DIR$/Unit_1/Unit_1.iml" filepath="$PROJECT_DIR$/Unit_1/Unit_1.iml" />
       <module fileurl="file://$PROJECT_DIR$/Unit_2/Unit_2.iml" filepath="$PROJECT_DIR$/Unit_2/Unit_2.iml" />
       <module fileurl="file://$PROJECT_DIR$/Unit_3/Unit_3.iml" filepath="$PROJECT_DIR$/Unit_3/Unit_3.iml" />
