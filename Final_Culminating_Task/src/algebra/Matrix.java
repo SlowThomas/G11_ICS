@@ -4,10 +4,12 @@ public class Matrix {
     public int[] shape = new int[2];
     protected double[][] body;
     public Matrix(double[][] body){
-        this.body = body;
         this.shape[0] = body.length;
         if(body.length > 0)
             this.shape[1] = body[0].length;
+        this.body = new double[this.shape[0]][this.shape[1]];
+        for(int i = 0; i < this.shape[0]; i++)
+            for(int j = 0; j < this.shape[1]; this.body[i][j] = body[i][j++]);
     }
 
     public Matrix dot(Matrix nxt) throws ArithmeticException{

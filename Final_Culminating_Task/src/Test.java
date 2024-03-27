@@ -3,6 +3,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.io.*;
+import algebra.*;
 
 public class Test extends JPanel{
     public Test(){
@@ -14,20 +15,13 @@ public class Test extends JPanel{
     public void paintComponent(Graphics g){
     }
 
-    public static void t1(){
-        System.out.println("t1");
-    }
+
 
     public static void main(String[] args){
-        t1();
-        t2();
+        double[] arr = {3, 2, 1};
+        Vector u = new Vector(1, 2, 3), v = new Vector(arr);
+        System.out.println(u.dot(v));
+        u = v;
+        System.out.println(u.dot(v) == u.mag * u.mag);
     }
-
-    public static void t2(){
-        System.out.println("t2");
-    }
-}
-
-class T2 extends JPanel{
-
 }
