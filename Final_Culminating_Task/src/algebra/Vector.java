@@ -40,4 +40,8 @@ public class Vector {
                 this.body[0] * nxt.body[1] - this.body[1] * nxt.body[0]
         );
     }
+
+    public double at(int i){
+        return body[i];
+    }
 }
