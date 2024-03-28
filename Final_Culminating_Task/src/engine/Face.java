@@ -3,10 +3,12 @@ import algebra.Vector;
 
 
 public class Face{
-    public Vector[] vertecies = new Vector[3];
+    public Vector[] vertices;
     public Vector color;
 
-    public Face(Vector[] vertecies, Vector color){
-        this.vertecies = vertecies;
+    public Face(Vector[] vertices, Vector color){
+        this.vertices = new Vector[vertices.length];
+        for(int i = 0; i < this.vertices.length; this.vertices[i] = vertices[i++]);
+        this.color = color;
     }
 }
