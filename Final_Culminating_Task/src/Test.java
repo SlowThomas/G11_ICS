@@ -5,23 +5,15 @@ import javax.imageio.ImageIO;
 import java.io.*;
 import algebra.*;
 
-public class Test extends JPanel{
-    public Test(){
-        // JPanel Default Settings
-        setPreferredSize(new Dimension(600,480));
-        setBackground(new Color(0,0,0));
-    }
-
-    public void paintComponent(Graphics g){
-    }
-
-
-
+public class Test{
     public static void main(String[] args){
-        double[] arr = {3, 2, 1};
-        Vector u = new Vector(1, 2, 3), v = new Vector(arr);
-        System.out.println(u.dot(v));
-        u = v;
-        System.out.println(u.dot(v) == u.mag * u.mag);
+        Vector v;
+        {
+            double[] a = {1, 2, 3};
+            v = new Vector(a);
+        }
+        System.out.println(v.at(0));
+        System.out.println(v.at(1));
+        System.out.println(v.at(2));
     }
 }

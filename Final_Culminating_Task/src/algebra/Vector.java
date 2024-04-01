@@ -6,9 +6,12 @@ public class Vector {
     protected double[] body;
 
     public Vector(double... body){
-        this.body = new double[body.length];
         this.shape = body.length;
+        this.body = body;
+        /*
+        this.body = new double[body.length];
         for(int i = 0; i < body.length; this.body[i] = body[i++]);
+         */
         for(int i = 0; i < this.shape; this.mag += body[i] * body[i++]);
         this.mag = Math.sqrt(this.mag);
     }
@@ -39,6 +42,28 @@ public class Vector {
                 this.body[2] * nxt.body[0] - this.body[0] * nxt.body[2],
                 this.body[0] * nxt.body[1] - this.body[1] * nxt.body[0]
         );
+    }
+
+    public Vector add(Vector nxt){
+        if(this.shape != nxt.shape)
+            throw new ArithmeticException(
+                    "Performing element-wise operation between a " + this.shape + "-d Vector and a " + nxt.shape + "-d Vector"
+            );
+        double[] v = new double[shape];
+        for(int i = 0; i < shape; i++)
+            v[i] = body[i] + nxt.body[i];
+        return new Vector(v);
+    }
+
+    public Vector subtract(Vector nxt){
+        if(this.shape != nxt.shape)
+            throw new ArithmeticException(
+                    "Performing element-wise operation between a " + this.shape + "-d Vector and a " + nxt.shape + "-d Vector"
+            );
+        double[] v = new double[shape];
+        for(int i = 0; i < shape; i++)
+            v[i] = body[i] - nxt.body[i];
+        return new Vector(v);
     }
 
     public double at(int i){

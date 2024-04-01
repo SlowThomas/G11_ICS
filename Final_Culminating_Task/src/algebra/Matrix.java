@@ -7,9 +7,23 @@ public class Matrix {
         this.shape[0] = body.length;
         if(body.length > 0)
             this.shape[1] = body[0].length;
+        /*
         this.body = new double[this.shape[0]][this.shape[1]];
         for(int i = 0; i < this.shape[0]; i++)
             for(int j = 0; j < this.shape[1]; this.body[i][j] = body[i][j++]);
+         */
+        this.body = body;
+    }
+
+    public Vector at(int col) {
+        double[] v = new double[shape[0]];
+        for (int i = 0; i < shape[0]; i++)
+            v[i] = body[col][i];
+        return new Vector(v);
+    }
+
+    public double at(int i, int j){
+        return body[i][j];
     }
 
     public Matrix dot(Matrix nxt) throws ArithmeticException{
