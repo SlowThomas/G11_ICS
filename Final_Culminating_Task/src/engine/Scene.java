@@ -1,4 +1,5 @@
 package engine;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Scene {
@@ -28,5 +29,6 @@ public class Scene {
 
     }
 
+    public void render(Graphics g){}
     // Surface normal: point out or point in decides color and visibility
 }
