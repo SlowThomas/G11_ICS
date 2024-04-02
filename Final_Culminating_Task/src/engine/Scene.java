@@ -1,5 +1,6 @@
 package engine;
 import java.awt.*;
+import java.awt.image.*;
 import java.util.ArrayList;
 
 public class Scene {
@@ -16,8 +17,13 @@ public class Scene {
     private int[] size = new int[3];
     private int section_size;
     private ArrayList<Object>[][][] sections;
-    public Scene(int width, int length, int height, int view_distance, Object[] obj_list){
+    private int ppi;
+
+
+    private byte[][][] screen;
+    public Scene(int width, int length, int height, int view_distance, int ppi, Object[] obj_list){
         section_size = 2 * view_distance; // use midline to decide the next section to load
+        this.ppi = ppi;
         // sections may cover more space than the whole scene
         sections = new ArrayList[width / section_size + 1][length / section_size + 1][height / section_size + 1];
         for(Object obj : obj_list){
@@ -29,6 +35,15 @@ public class Scene {
 
     }
 
-    public void render(Graphics g){}
+    public void render(Graphics g){
+        BufferedImage img = new BufferedImage(Screen.width, Screen.height, BufferedImage.TYPE_INT_RGB);
+
+        for ( int rc = 0; rc < Screen.height; rc++ ) {
+            for ( int cc = 0; cc < Screen.width; cc++ ) {
+                // Set the pixel colour of the image n.b. x = cc, y = rc
+                img.setRGB(cc, rc, Color.BLACK.getRGB() );
+            }
+        }
+    }
     // Surface normal: point out or point in decides color and visibility
 }
