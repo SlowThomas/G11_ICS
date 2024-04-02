@@ -26,6 +26,7 @@ public class Scene {
         this.ppi = ppi;
         // sections may cover more space than the whole scene
         sections = new ArrayList[width / section_size + 1][length / section_size + 1][height / section_size + 1];
+        // TODO: use different method to group objects, as they may move
         for(Object obj : obj_list){
             int i = (int)(obj.pos.at(0) - width / 2) / section_size;
             int j = (int)(obj.pos.at(1) - length / 2) / section_size;
