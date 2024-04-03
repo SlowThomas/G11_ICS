@@ -1,0 +1,27 @@
+First Name     Last Name      Term Marks     Final Exam     Final Grade    
+Owen           Cao            87.2           93.8           89.2           
+Brian          Chen           91.6           83.2           89.1           
+Jason          Chen           87.9           98.2           91.0           
+Jenson         Cropley        100.0          100.0          100.0          
+Ethan          Dam            61.3           98.2           72.4           
+Nima           Dehkordi       33.2           12.5           27.0           
+Rohan          Garg           88.8           20.2           68.2           
+Yusuf          Gokce          58.2           100.0          70.7           
+Jason          Guan           93.2           87.2           91.4           
+Karen          Guo            71.6           87.3           76.3           
+Grace          Huang          92.4           57.7           82.0           
+Hardy          Huang          100.0          7.9            72.4           
+Yijun          Huang          98.2           46.8           82.8           
+Harisman       Jeyakanthan    43.2           91.2           57.6           
+Lauren         Jung           72.3           68.9           71.3           
+Jonathan       Lin            82.3           57.8           74.9           
+Anthony        Sin            34.1           36.2           34.7           
+Yicong         Situ           73.2           91.2           78.6           
+Rachel         Su             86.2           79.5           84.2           
+William        Sun            86.2           63.2           79.3           
+Brendan        Tam            98.2           93.6           96.8           
+Adrian         Wu             100.0          99.9           100.0          
+Stefan         Wu             79.9           80.1           80.0           
+Steven         Zhang          67.3           78.2           70.6           
+Hanfei         Zhou           23.5           52.1           32.1           
+Christopher    Zhu            64.2           64.6           64.3           
