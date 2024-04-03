@@ -14,26 +14,16 @@ public class Scene {
 
 
 
-    private int[] size = new int[3];
-    private int section_size;
-    private ArrayList<Object>[][][] sections;
+    private int[] size;
     private int ppi;
+    private Object[] obj_list;
 
 
     private byte[][][] screen;
     public Scene(int width, int length, int height, int view_distance, int ppi, Object[] obj_list){
-        section_size = 2 * view_distance; // use midline to decide the next section to load
         this.ppi = ppi;
-        // sections may cover more space than the whole scene
-        sections = new ArrayList[width / section_size + 1][length / section_size + 1][height / section_size + 1];
-        // TODO: use different method to group objects, as they may move
-        for(Object obj : obj_list){
-            int i = (int)(obj.pos.at(0) - width / 2) / section_size;
-            int j = (int)(obj.pos.at(1) - length / 2) / section_size;
-            int k = (int)(obj.pos.at(2) - height / 2) / section_size;
-            sections[i][j][k].add(obj);
-        }
-
+        this.obj_list = obj_list;
+        this.size = new int[]{width, length, height};
     }
 
     public void render(Graphics g){
