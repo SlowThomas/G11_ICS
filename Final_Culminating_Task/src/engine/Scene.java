@@ -2,6 +2,20 @@ package engine;
 import java.awt.*;
 import java.awt.image.*;
 import java.util.ArrayList;
+import algebra.*;
+
+class Algorithm {
+    public static void rasterize(Matrix vertices, Vector colors, byte[][][] screen){
+        // TODO: update the projection matrix
+        Matrix vect2 = (new Matrix({{}})).dot(vertices);
+
+        int l = Math.max((int)Math.min(Math.min(vect2.at(0, 0), vect2.at(0, 1)), vect2.at(0, 2)), 0);
+        int r = Math.min((int)Math.max(Math.max(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), screen.length - 1);
+        int t = Math.max((int)Math.min(Math.min(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), 0);
+        int b = Math.min((int)Math.max(Math.max(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), screen[0].length - 1);
+
+    }
+}
 
 public class Scene {
     // Consider:
@@ -31,7 +45,7 @@ public class Scene {
 
         for(Object obj : obj_list){
             for(int i = 0; i < obj.faces.length; i++){
-                Algorithms.floodFill(obj.faces[i], obj.colo[i], screen);
+                Algorithm.rasterize(obj.faces[i], obj.colo[i], screen);
             }
         }
 
