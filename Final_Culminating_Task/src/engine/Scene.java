@@ -1,18 +1,20 @@
 package engine;
 import java.awt.*;
 import java.awt.image.*;
-import java.util.ArrayList;
 import algebra.*;
 
 class Algorithm {
     public static void rasterize(Matrix vertices, Vector colors, byte[][][] screen){
-        // TODO: update the projection matrix
-        Matrix vect2 = (new Matrix({{}})).dot(vertices);
+        double[][] vect2 = {
+                {Screen.distance * vertices.at(0, 0) / vertices.at(0, 2), Screen.distance * vertices.at(1, 0) / vertices.at(1, 2), Screen.distance * vertices.at(2, 0) / vertices.at(2, 2)},
+                {Screen.distance * vertices.at(0, 1) / vertices.at(0, 2), Screen.distance * vertices.at(1, 1) / vertices.at(1, 2), Screen.distance * vertices.at(2, 1) / vertices.at(2, 2)},
+                {vertices.at(0, 2), vertices.at(1, 2), vertices.at(2, 2)}
+        };
 
-        int l = Math.max((int)Math.min(Math.min(vect2.at(0, 0), vect2.at(0, 1)), vect2.at(0, 2)), 0);
-        int r = Math.min((int)Math.max(Math.max(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), screen.length - 1);
-        int t = Math.max((int)Math.min(Math.min(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), 0);
-        int b = Math.min((int)Math.max(Math.max(vect2.at(1, 0), vect2.at(1, 1)), vect2.at(1, 2)), screen[0].length - 1);
+        int l = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
+        int r = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.length - 1);
+        int t = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
+        int b = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen[0].length - 1);
 
     }
 }
