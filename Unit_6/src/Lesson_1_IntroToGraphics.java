@@ -21,6 +21,23 @@ public class Lesson_1_IntroToGraphics extends JPanel{
 
         g.setColor(new Color(0, 255, 0));
         g.fillRect(500, 400, 50, 50);
+
+        g.setColor(new Color(0, 0, 0));
+        g.drawOval(450, 100, 100, 50);
+
+        g.setColor(new Color(128, 0, 128));
+        g.fillArc(350, 360, 100, 100, 30, 300);
+
+        g.setColor(new Color(255, 69, 0));
+
+        // You can set up the font before drawing the string
+        // Font(font, style, size)
+        g.setFont(new Font("Times New Roman", Font.PLAIN, 50));
+
+        // Unlike MOST of the draw commands where
+        // it uses the top left corner coordinate as a reference
+        // g.drawString uses the bottom left corner as a reference
+        g.drawString("Hello World", 0, 50);
     }
 
     public static void main(String[] args){
