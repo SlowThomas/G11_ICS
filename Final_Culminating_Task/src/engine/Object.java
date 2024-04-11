@@ -1,11 +1,7 @@
 package engine;
 import algebra.*;
 
-// TODO: collision box
-
 public class Object {
-    private final double pi = Math.PI;
-    private final double epsilon = 1E-10; // another choice: 1E-14
 
     // Consider:
     // Barycentric coordinates
@@ -42,7 +38,7 @@ public class Object {
         // d - displacement after the rotation
         double theta = axle.dir.mag;
 
-        if(Math.abs(theta) < epsilon){
+        if(Math.abs(theta) < Consts.epsilon){
             translate(trail);
             return;
         }

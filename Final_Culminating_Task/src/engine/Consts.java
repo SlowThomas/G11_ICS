@@ -1,6 +1,6 @@
 package engine;
 
-public class Screen {
+public class Consts {
     // MacBook Air display: 13.3-inch 1440 × 900
     public static int width = 1440;
     public static int height = 900;
@@ -9,4 +9,9 @@ public class Screen {
 
     public static double distance = 30; // in inch
     // taken the midpoint in the range of recommended eye-screen distance
+    
+    // Consts for operation
+    public static double epsilon = 1E-10; // another choice: 1E-14
+    private final double pi = Math.PI;
+
 }
