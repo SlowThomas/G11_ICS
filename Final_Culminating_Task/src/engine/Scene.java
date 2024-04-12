@@ -11,7 +11,11 @@ class Consts {
 
     public static double distance = 30; // in inch
     // taken the midpoint in the range of recommended eye-screen distance
+<<<<<<< HEAD
     public static double view_distance = 10000; // in inch, about 0.25 km
+=======
+    public static double view_distance = 10000 // in inch, about 0.25 km
+>>>>>>> 2c31dadabf7df6661a9b20177f5ea6e7d9339353
     
     // Consts for operation
     public static double epsilon = 1E-10; // another choice: 1E-14
