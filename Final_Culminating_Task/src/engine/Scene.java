@@ -2,27 +2,54 @@ package engine;
 import java.awt.*;
 import java.awt.image.*;
 import algebra.*;
+class Consts {
+    // MacBook Air display: 13.3-inch 1440 × 900
+    public static int width = 1440;
+    public static int height = 900;
+    public static double size = 13.3; // in inch
+    public static int ppi = (int)(Math.sqrt(width * width + height * height) / size) + 1;
 
+    public static double distance = 30; // in inch
+    // taken the midpoint in the range of recommended eye-screen distance
+    public static double view_distance = 10000; // in inch, about 0.25 km
+    
+    // Consts for operation
+    public static double epsilon = 1E-10; // another choice: 1E-14
+    private final double pi = Math.PI;
+
+}
 class Algorithm {
     private static final double epsilon = 1E-10; // another choice: 1E-14
 
-    public static boolean edgeFunction(Vector a, Vector b, Vector c) {
-        // return ((c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x) >= 0);
-        return true;
+    public static boolean edgeFunction(double ax, double ay, double bx, double by, double px, double py) {
+        return (px - ax) * (by - ay) - (py - ay) * (bx - ax) >= 0;
     }
 
-    public static boolean point_in_triangle(int x, int y, double[][] triangle){
+    public static boolean point_in_triangle(double px, double py, double[][] triangle){
         boolean inside = true;
         // inside &= edgeFunction(V0, V1, p);
         // inside &= edgeFunction(V1, V2, p);
         // inside &= edgeFunction(V2, V0, p);
-        return false;
+        inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
+        inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
+        inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+        return inside;
     }
     public static void rasterize(Matrix vertices, Vector color, byte[][][] screen){
-        double[][] vect2 = {
+        /*double[][] vect2 = {
                 {Consts.distance * vertices.at(0, 0) / vertices.at(0, 2), Consts.distance * vertices.at(1, 0) / vertices.at(1, 2), Consts.distance * vertices.at(2, 0) / vertices.at(2, 2)},
                 {Consts.distance * vertices.at(0, 1) / vertices.at(0, 2), Consts.distance * vertices.at(1, 1) / vertices.at(1, 2), Consts.distance * vertices.at(2, 1) / vertices.at(2, 2)},
-                {vertices.at(0, 2), vertices.at(1, 2), vertices.at(2, 2)}
+        };*/
+        Matrix proj = (new Matrix(new double[][]{
+            {Consts.distance, 0, 0, 0},
+            {0, Consts.distance, 0, 0},
+            {0, 0, Consts.distance + Consts.view_distance, -Consts.distance * Consts.view_distance},
+            {0, 0, 1, 0}
+        })).dot(vertices);
+
+        double[][] vect2 = {
+            {proj.at(0, 0) / proj.at(0, 3), proj.at(1, 0) / proj.at(1, 3), proj.at(2, 0) / proj.at(2, 3)},
+            {proj.at(0, 1) / proj.at(0, 3), proj.at(1, 1) / proj.at(1, 3), proj.at(2, 1) / proj.at(2, 3)}
         };
 
         // Generate the equation of the plane: ax + by + cz = d
@@ -40,6 +67,7 @@ class Algorithm {
         for(int i = left; i < right; i++){
             for(int j = top; j < bottom; j++){
                 if(point_in_triangle(i, j, vect2) && Math.abs(c) > epsilon){
+                    // r, g, b, z-buffer
                     screen[i][j] = new byte[]{
                             (byte)color.at(0), (byte)color.at(1), (byte)color.at(2),
                             };
