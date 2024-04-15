@@ -35,6 +35,17 @@ class Algorithm {
         inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
         return inside;
     }
+
+    public static double z_buff(double x, double y, double[][] triangle){
+        // barycentric coordinate using the inverses. z_buffer's are linear to each other in terms of their inverses
+        double t = (triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0]);
+        if(t < epsilon || Math.abs(triangle[0][2]) < epsilon) return triangle[0][2];
+        double l1 = ((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
+        double l2 = ((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
+        double l3 = ((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
+        return 1 / ();
+    }
+
     public static void rasterize(Matrix vertices, Vector color, byte[][][] screen){
         /*double[][] vect2 = {
                 {Consts.distance * vertices.at(0, 0) / vertices.at(0, 2), Consts.distance * vertices.at(1, 0) / vertices.at(1, 2), Consts.distance * vertices.at(2, 0) / vertices.at(2, 2)},
@@ -49,7 +60,8 @@ class Algorithm {
 
         double[][] vect2 = {
             {proj.at(0, 0) / proj.at(0, 3), proj.at(1, 0) / proj.at(1, 3), proj.at(2, 0) / proj.at(2, 3)},
-            {proj.at(0, 1) / proj.at(0, 3), proj.at(1, 1) / proj.at(1, 3), proj.at(2, 1) / proj.at(2, 3)}
+            {proj.at(0, 1) / proj.at(0, 3), proj.at(1, 1) / proj.at(1, 3), proj.at(2, 1) / proj.at(2, 3)},
+            {proj.at(0, 3), proj.at(1, 3), proj.at(2, 3)}
         };
 
         // Generate the equation of the plane: ax + by + cz = d
@@ -64,6 +76,7 @@ class Algorithm {
         int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
         int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen[0].length);
 
+        double[][] z_buffer = new double[screen.length][screen[0].length];
         for(int i = left; i < right; i++){
             for(int j = top; j < bottom; j++){
                 if(point_in_triangle(i, j, vect2) && Math.abs(c) > epsilon){
@@ -71,6 +84,7 @@ class Algorithm {
                     screen[i][j] = new byte[]{
                             (byte)color.at(0), (byte)color.at(1), (byte)color.at(2),
                             };
+                    z_buffer[i][j] = z_buff(i, j, vect2);
                 }
             }
         }
