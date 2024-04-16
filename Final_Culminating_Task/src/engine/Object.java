@@ -1,11 +1,11 @@
 package engine;
 import algebra.*;
 
-class Consts{
-    public static double epsilon = 1E-10; // another choice: 1E-14
-}
-
 public class Object {
+
+    private static class Consts{
+        public static double epsilon = 1E-10; // another choice: 1E-14
+    }
 
     // Consider:
     // rgb as fractions
