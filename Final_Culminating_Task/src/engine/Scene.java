@@ -18,6 +18,21 @@ class Consts {
     private final double pi = Math.PI;
 
 }
+
+class Screen{
+    public int[][] colo;
+    public double[][] z_buffer;
+    public int width;
+    public int height;
+
+    public Screen(int width, int height){
+        colo = new int[width][height];
+        z_buffer = new double[width][height];
+        this.width = width;
+        this.height = height;
+    }
+}
+
 class Algorithm {
     private static final double epsilon = 1E-10; // another choice: 1E-14
 
@@ -49,7 +64,7 @@ class Algorithm {
     }
 
     // vertices are transformed into camera space before this
-    public static void rasterize(Matrix vertices, Vector color, byte[][][] screen){
+    public static void rasterize(Matrix vertices, int color, Screen screen){
         double z0 = Math.max(epsilon, vertices.at(0, 2));
         double z1 = Math.max(epsilon, vertices.at(1, 2));
         double z2 = Math.max(epsilon, vertices.at(2, 2));
@@ -61,62 +76,56 @@ class Algorithm {
         };
 
         int left = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
-        int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.length);
+        int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.width);
         int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
-        int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen[0].length);
+        int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
 
-        double[][] z_buffer = new double[screen.length][screen[0].length];
         double z;
         for(int i = left; i < right; i++){
             for(int j = top; j < bottom; j++){
                 if(point_in_triangle(i, j, vect2)){
                     z = z_buff(i, j, vect2);
-                    if(z >= z_buffer[i][j]) continue;
+                    if(z >= screen.z_buffer[i][j]) continue;
+                    // TODO: Surface normal: point out or point in decides color and visibility
                     // r, g, b
-                    screen[i][j] = new byte[]{(byte)color.at(0), (byte)color.at(1), (byte)color.at(2)};
-                    z_buffer[i][j] = z;
+                    screen.colo[i][j] = color;
+                    screen.z_buffer[i][j] = z;
                 }
             }
         }
-        // TODO: return the screen, or find way to reference the screen parameter.
     }
 }
 
 public class Scene {
     // Consider:
     // Light intensity
-    // Z buffer as a pair (adjusted color, depth)
-    // rotation by re-shifting rotation axis to a primary axis
 
     private int[] size;
     private int ppi;
     private Object[] obj_list;
 
+    private Screen screen;
 
-    private byte[][][] screen;
     public Scene(int width, int length, int height, int view_distance, int ppi, Object[] obj_list){
         this.ppi = ppi;
         this.obj_list = obj_list;
         this.size = new int[]{width, length, height};
     }
 
-    public void render(Graphics g){
-        BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
-
+    // canvas declearation: BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
+    public void render(BufferedImage canvas){
+        
         for(Object obj : obj_list){
             for(int i = 0; i < obj.faces.length; i++){
                 Algorithm.rasterize(obj.faces[i], obj.colo[i], screen);
             }
         }
 
-        /*
-        for ( int rc = 0; rc < Consts.height; rc++ ) {
-            for ( int cc = 0; cc < Consts.width; cc++ ) {
-                // Set the pixel colour of the image n.b. x = cc, y = rc
-                img.setRGB(cc, rc, Color.BLACK.getRGB() );
+        for(int x = 0; x < canvas.getWidth(); x++){
+            for(int y = 0; y < canvas.getHeight(); y++){
+                canvas.setRGB(x, y, screen.colo[x][y]);
             }
         }
-         */
+
     }
-    // Surface normal: point out or point in decides color and visibility
 }
