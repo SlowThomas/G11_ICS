@@ -13,17 +13,14 @@ public class Object {
 
     public Matrix[] faces;
     public int[] colo;
-    public Vector[] normal;
     public Vector pos = new Vector(0, 0, 0, 1);
     public Object(Matrix[] faces, int[] colo){
         this.faces = faces;
         this.colo = colo;
-        normal = new Vector[faces.length];
-        for(int i = 0; i < faces.length; i++){
-            normal[i] = faces[i].at(i + 1).subtract(faces[i].at(i)).cross(faces[i].at(i + 2).subtract(faces[i].at(i)));
-        }
     }
 
+    // TODO: consider world space transformation vs model space transformation
+    // https://youtu.be/C8YtdC8mxTU?si=x8JEaW6EPB-rh93D&t=193
     public void transform(Vector trail, Ray axle){
         // Note: length of the axle's direction vector determines the angle
 
@@ -73,8 +70,6 @@ public class Object {
                 {0, 0, 0, 1}
         });
 
-        for(int i = 0; i < normal.length; i++)
-            normal[i] = R.dot(normal[i]);
         for(int i = 0; i < faces.length; i++)
             faces[i] = T.dot(faces[i]);
         pos = T.dot(pos);
@@ -91,6 +86,10 @@ public class Object {
         for(int i = 0; i < faces.length; i++)
             faces[i] = T.dot(faces[i]);
         pos = T.dot(pos);
+    }
+
+    public void cd(Vector destination){
+        translate(destination.subtract(pos));
     }
 
 }
