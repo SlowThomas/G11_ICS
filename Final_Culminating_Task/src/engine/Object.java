@@ -1,26 +1,21 @@
 package engine;
 import algebra.*;
 
+class Consts{
+    public static double epsilon = 1E-10; // another choice: 1E-14
+}
+
 public class Object {
 
     // Consider:
-    // Barycentric coordinates
     // rgb as fractions
     // https://www.youtube.com/watch?v=C8YtdC8mxTU
 
     public Matrix[] faces;
     public int[] colo;
-    // Note: the last dimension of colo is the first index of the vertex of the corresponding face's
     public Vector[] normal;
     public Vector pos = new Vector(0, 0, 0, 1);
     public Object(Matrix[] faces, int[] colo){
-        /*
-        this.faces = new Matrix[faces.length];
-        for(int i = 0; i < faces.length; this.faces[i] = faces[i++]);
-        this.colo = new Vector[colo.length];
-        for(int i = 0; i < colo.length; this.colo[i] = colo[i++]);
-         */
-
         this.faces = faces;
         this.colo = colo;
         normal = new Vector[faces.length];
