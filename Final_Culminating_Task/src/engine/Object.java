@@ -19,8 +19,20 @@ public class Object {
         this.colo = colo;
     }
 
-    // TODO: consider world space transformation vs model space transformation
-    // https://youtu.be/C8YtdC8mxTU?si=x8JEaW6EPB-rh93D&t=193
+    public Matrix T_model = new Matrix(new double[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+    }); // model space transformation
+    public Matrix T_world = new Matrix(new double[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+    }); // world space transformation
+
+    // world space transformation
     public void transform(Vector trail, Ray axle){
         // Note: length of the axle's direction vector determines the angle
 
@@ -70,8 +82,7 @@ public class Object {
                 {0, 0, 0, 1}
         });
 
-        for(int i = 0; i < faces.length; i++)
-            faces[i] = T.dot(faces[i]);
+        T_world = T.dot(T_world);
         pos = T.dot(pos);
     }
 
@@ -83,8 +94,7 @@ public class Object {
                 {0, 0, 0, 1}
         });
 
-        for(int i = 0; i < faces.length; i++)
-            faces[i] = T.dot(faces[i]);
+        T_world = T.dot(T_world);
         pos = T.dot(pos);
     }
 
