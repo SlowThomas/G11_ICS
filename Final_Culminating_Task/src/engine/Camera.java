@@ -67,12 +67,6 @@ public class Camera {
                 {x31, x32, x33, (1 - Math.cos(theta)) * (ux*uy*cz - ux*uz*cy) + uy*Math.sin(theta)*cz - uz*Math.sin(theta)*cx + cz + dz},
                 {0, 0, 0, 1}
         });
-        Matrix R = new Matrix(new double[][]{
-                {x11, x12, x13, 0},
-                {x21, x22, x23, 0},
-                {x31, x32, x33, 0},
-                {0, 0, 0, 1}
-        });
 
         T = Trans.dot(T);
         pos = T.dot(pos);
