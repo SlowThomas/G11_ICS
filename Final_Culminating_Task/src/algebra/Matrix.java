@@ -77,8 +77,9 @@ public class Matrix {
     public double det() throws ArithmeticException{
         if(shape[0] != shape[1]) throw new ArithmeticException("Matrix is not square");
 
-        if(shape[0] == 2)
-            return body[0][0] * body[1][1] - body[0][1] * body[1][0];
+        if(shape[0] == 1){
+            return body[0][0];
+        }
 
         double det = 0;
         for(int i = 0; i < shape[0]; i++){
@@ -125,13 +126,23 @@ public class Matrix {
     // Method to compute the minor of a matrix with a specific row and column removed
     public Matrix minor(int row, int col) {
         double[][] minor = new double[shape[0] - 1][shape[1] - 1];
-        for(int x = 0, i = 0; x < minor.length; x++, i++){
-            if(x == row) { i--; continue;}
-            for(int y = 0, j = 0; y < minor[0].length; y++, j++){
-                if(y == col) { j--; continue;}
-                minor[i][j] = body[x][y];
+        for(int x = 0, i = 0; x < shape[0]; x++){
+            if(x == row) continue;
+            for(int y = 0, j = 0; y < shape[1]; y++){
+                if(y == col) continue;
+                minor[i][j++] = body[x][y];
             }
+            i++;
         }
         return new Matrix(minor);
+    }
+
+    public void print(){
+        for(int i = 0; i < shape[0]; i++){
+            for(int j = 0; j < shape[1]; j++){
+                System.out.printf("%f ", body[i][j]);
+            }
+            System.out.println();
+        }
     }
 }
