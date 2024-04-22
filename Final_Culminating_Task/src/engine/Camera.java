@@ -70,6 +70,8 @@ public class Camera {
 
         T = Trans.dot(T);
         pos = T.dot(pos);
+
+        T_inverse = T.inverse();
     }
 
     public void translate(Vector trail){
@@ -82,6 +84,8 @@ public class Camera {
 
         T = Trans.dot(T);
         pos = T.dot(pos);
+
+        T_inverse = T.inverse();
     }
 
     public void cd(Vector destination){
