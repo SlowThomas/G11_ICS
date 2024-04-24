@@ -1,5 +1,7 @@
 package engine;
 import algebra.*;
+import java.util.Scanner;
+import java.io.File;
 
 public class Object {
 
@@ -17,6 +19,35 @@ public class Object {
     public Object(Matrix[] faces, int[] colo){
         this.faces = faces;
         this.colo = colo;
+    }
+
+    public Object(String filename){
+        Scanner file;
+        try{
+            file = new Scanner(new File(filename));
+        } catch(Exception e){
+            System.err.printf("Cannot find object file: \"%s\"\n", filename);
+            return;
+        }
+
+        Vector[] v, vt, vn, vp, f;
+        int v_len = 0, vt_len = 0, vn_len = 0, vp_len = 0, f_len = 0;
+        String line;
+        while(file.hasNextLine()){
+            line = file.nextLine();
+            if(line.startsWith("v")) v_len++;
+            if(line.startsWith("vt")) vt_len++;
+            if(line.startsWith("vn")) vn_len++;
+            if(line.startsWith("vp")) vp_len++;
+            if(line.startsWith("f")) f_len++;
+        }
+        file.close();
+        v = new Vector[v_len];
+        vt = new Vector[vt_len];
+        vn = new Vector[vn_len];
+        vp = new Vector[vp_len];
+        f = new Vector[f_len];
+        v_len = 0; vt_len = 0; vn_len = 0; vp_len = 0; f_len = 0;
     }
 
     public Matrix T_model = new Matrix(new double[][]{
