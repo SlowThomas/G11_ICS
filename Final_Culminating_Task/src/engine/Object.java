@@ -13,7 +13,10 @@ public class Object {
     // rgb as fractions
     // https://www.youtube.com/watch?v=C8YtdC8mxTU
 
-    public Matrix[] faces;
+    public int[] f;
+    public Vector[] v;
+    public Vector[] vt;
+    public Vector[] vn;
     public int[] colo;
     public Vector pos = new Vector(0, 0, 0, 1);
     public Object(Matrix[] faces, int[] colo){
