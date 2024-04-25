@@ -13,18 +13,16 @@ public class Object {
     // rgb as fractions
     // https://www.youtube.com/watch?v=C8YtdC8mxTU
 
-    public int[] f;
+    public int[][] f;
     public Vector[] v;
     public Vector[] vt;
     public Vector[] vn;
+    // public Vector[] vp;
     public int[] colo;
     public Vector pos = new Vector(0, 0, 0, 1);
-    public Object(Matrix[] faces, int[] colo){
-        this.faces = faces;
-        this.colo = colo;
-    }
 
     public Object(String filename){
+        // TODO: search in folder for files
         Scanner file;
         try{
             file = new Scanner(new File(filename));
@@ -33,9 +31,9 @@ public class Object {
             return;
         }
 
-        Vector[] v, vt, vn, vp, f;
         int v_len = 0, vt_len = 0, vn_len = 0, vp_len = 0, f_len = 0;
         String line;
+        String[] para;
         while(file.hasNextLine()){
             line = file.nextLine();
             if(line.startsWith("v")) v_len++;
@@ -48,9 +46,46 @@ public class Object {
         v = new Vector[v_len];
         vt = new Vector[vt_len];
         vn = new Vector[vn_len];
-        vp = new Vector[vp_len];
-        f = new Vector[f_len];
+        // vp = new Vector[vp_len];
+        f = new int[f_len][];
         v_len = 0; vt_len = 0; vn_len = 0; vp_len = 0; f_len = 0;
+
+        // NOTE: weight parameter is not considered yet
+        while(file.hasNextLine()){
+            para = file.nextLine().split(" ");
+            if(para[0].equals("v")){
+                // vertex
+                v[v_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
+            }
+            if(para[0].equals("vt")){
+                // texture vertex
+                if(para.length == 2){
+                    vt[vt_len++] = new Vector(Double.parseDouble(para[1]), 1);
+                }
+                else{
+                    vt[vt_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), 1);
+                }
+            }
+            if(para[0].equals("vn")){
+                // normal
+                vn[vn_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
+            }
+            if(para[0].equals("vp")){
+                // Free-form geometry statement
+            }
+            if(para[0].equals("f")){
+                // face
+                for(int i = 1; i < para.length; i++){
+                    String[] features = para[i].split("/");
+                    f[f_len]
+                    for(String feature : features){
+
+                    }
+                }
+                f_len++;
+            }
+        }
+
     }
 
     public Matrix T_model = new Matrix(new double[][]{
