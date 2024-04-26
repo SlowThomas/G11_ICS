@@ -18,7 +18,7 @@ public class Object {
     public Vector[] vt;
     public Vector[] vn;
     // public Vector[] vp;
-    public int[] colo;
+    public Vector[] colo;
     public Vector pos = new Vector(0, 0, 0, 1);
 
     public Object(String filename){
@@ -53,6 +53,7 @@ public class Object {
         // NOTE: weight parameter is not considered yet
         while(file.hasNextLine()){
             para = file.nextLine().split(" ");
+            if(para[0].isEmpty() || para[0].startsWith("#")) continue;
             if(para[0].equals("v")){
                 // vertex
                 v[v_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
@@ -77,9 +78,12 @@ public class Object {
                 // face
                 for(int i = 1; i < para.length; i++){
                     String[] features = para[i].split("/");
-                    f[f_len]
-                    for(String feature : features){
-
+                    f[f_len] = new int[features.length];
+                    for(int j = 0; j < features.length; j++){
+                        if(features[j].isEmpty()){
+                            continue;
+                        }
+                        f[f_len][j] = Integer.parseInt(features[j]);
                     }
                 }
                 f_len++;

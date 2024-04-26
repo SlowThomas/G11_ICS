@@ -119,8 +119,8 @@ public class Scene {
     public void render(BufferedImage canvas){
         
         for(Object obj : obj_list){
-            for(int i = 0; i < obj.faces.length; i++){
-                Algorithm.rasterize(obj.faces[i], obj.colo[i], screen);
+            for(int i = 0; i < obj.f.length; i++){
+                //Algorithm.rasterize(obj.f[i], obj.colo[i], screen);
             }
         }
 

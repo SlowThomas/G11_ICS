@@ -1,9 +1,6 @@
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import javax.swing.*;
-import javax.imageio.ImageIO;
-import java.io.*;
 import algebra.*;
+import java.awt.Color;
+import java.sql.SQLSyntaxErrorException;
 
 public class Test{
     public static void main(String[] args){
@@ -26,5 +23,16 @@ public class Test{
         System.out.println(mat.det());
         mat.inverse().print();
          */
+
+        // Parser tests
+        // System.out.println(Integer.ParseInt("")); // err
+        // System.out.println("1//3".split("/")[1].isEmpty()); // true
+
+        // array tests
+        // System.out.println((new int[2])[0]); // 0
+        // System.out.println("".split(" ")[0].isEmpty()); // true
+
+        // Color tests
+        System.out.println(new Color(256 * 255));
     }
 }
