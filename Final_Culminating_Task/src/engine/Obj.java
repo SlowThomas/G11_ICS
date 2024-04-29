@@ -3,7 +3,7 @@ import algebra.*;
 import java.util.Scanner;
 import java.io.File;
 
-public class Object {
+public class Obj {
 
     private static class Consts{
         public static double epsilon = 1E-10; // another choice: 1E-14
@@ -21,7 +21,20 @@ public class Object {
     public Vector[] colo;
     public Vector pos = new Vector(0, 0, 0, 1);
 
-    public Object(String filename){
+    public Matrix T_model = new Matrix(new double[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+    }); // model space transformation
+    public Matrix T_world = new Matrix(new double[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 1, 0},
+            {0, 0, 0, 1}
+    }); // world space transformation
+
+    public Obj(String filename){
         // TODO: search in folder for files
         Scanner file;
         try{
@@ -83,7 +96,7 @@ public class Object {
                         if(features[j].isEmpty()){
                             continue;
                         }
-                        f[f_len][j] = Integer.parseInt(features[j]);
+                        f[f_len][j] = Integer.parseInt(features[j]) - 1;
                     }
                 }
                 f_len++;
@@ -91,19 +104,6 @@ public class Object {
         }
 
     }
-
-    public Matrix T_model = new Matrix(new double[][]{
-            {1, 0, 0, 0},
-            {0, 1, 0, 0},
-            {0, 0, 1, 0},
-            {0, 0, 0, 1}
-    }); // model space transformation
-    public Matrix T_world = new Matrix(new double[][]{
-            {1, 0, 0, 0},
-            {0, 1, 0, 0},
-            {0, 0, 1, 0},
-            {0, 0, 0, 1}
-    }); // world space transformation
 
     // world space transformation
     public void transform(Vector trail, Ray axle){
