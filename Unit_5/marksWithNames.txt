@@ -1,0 +1,25 @@
+First Name     Last Name      Term Marks     Exam Marks     Final Grade    
+Anika          Agashe         87.2           93.8           89.2           
+Jakin          Chan           91.6           83.2           89.1           
+Javan          Cheung         87.9           98.2           91.0           
+Vincent        Deng           100.0          100.0          100.0          
+Julian         Fisla          61.3           98.2           72.4           
+Calvin         Lee            33.2           12.5           27.0           
+John           Liu            88.8           20.2           68.2           
+Kailyn         Shao           58.2           100.0          70.7           
+Mark           Xu             93.2           87.2           91.4           
+Jina           Yang           71.6           87.3           76.3           
+Eddie          Chen           92.4           57.7           82.0           
+Demir          Eren           100.0          7.9            72.4           
+Ray            Guan           98.2           46.8           82.8           
+Orion          Chen           43.2           91.2           57.6           
+Jonathan       Mak            72.3           68.9           71.3           
+Brendan        Ng             82.3           57.8           74.9           
+Simon          Ru             34.1           36.2           34.7           
+Harold         Tan            73.2           91.2           78.6           
+Gary           Wang           86.2           79.5           84.2           
+Gilbert        Wang           86.2           63.2           79.3           
+Bonnie         Wen            98.2           93.6           96.8           
+Lorraine       Wong           100.0          99.9           100.0          
+Stanley        Xia            79.9           80.1           80.0           
+Jessica        Yang           67.3           78.2           70.6           
