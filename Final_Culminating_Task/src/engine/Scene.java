@@ -77,6 +77,8 @@ public class Scene {
                 int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
                 int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
 
+                double[][] color = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}; // TODO: load color
+
                 double z;
                 for(int i = left; i < right; i++){
                     for(int j = top; j < bottom; j++){
@@ -86,7 +88,10 @@ public class Scene {
                             double[] weight = barycentric(i, j, vect2);
                             // TODO: Surface normal: point out or point in decides color and visibility
                             // r, g, b
-                            screen.colo[i][j] = color;
+                            screen.colo[i][j] =
+                                    (int)((weight[0] * color[0][0] + weight[1] * color[1][0] + weight[2] * color[2][0]) * 255 ) * (1<<15) + // r
+                                    (int)((weight[0] * color[0][1] + weight[1] * color[1][1] + weight[2] * color[2][1]) * 255) * (1<<8) + // g
+                                    (int)((weight[0] * color[0][2] + weight[1] * color[1][2] + weight[2] * color[2][2]) * 255); // b
                             screen.z_buffer[i][j] = z;
                         }
                     }
