@@ -33,6 +33,6 @@ public class Test{
         // System.out.println("".split(" ")[0].isEmpty()); // true
 
         // Color tests
-        System.out.println(new Color(256 * 255));
+        // System.out.println((new Color(255)).getRGB());
     }
 }
