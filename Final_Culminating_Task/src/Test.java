@@ -1,6 +1,5 @@
 import algebra.*;
 import java.awt.Color;
-import java.sql.SQLSyntaxErrorException;
 
 public class Test{
     public static void main(String[] args){
