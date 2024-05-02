@@ -13,6 +13,7 @@ public class Obj {
     // rgb as fractions
     // https://www.youtube.com/watch?v=C8YtdC8mxTU
 
+    public String mtl;
     public int[][] f;
     public Vector[] v;
     public Vector[] vt;
@@ -35,7 +36,6 @@ public class Obj {
     }); // world space transformation
 
     public Obj(String filename){
-        // TODO: search in folder for files
         Scanner file;
         try{
             file = new Scanner(new File(filename));
@@ -45,15 +45,15 @@ public class Obj {
         }
 
         int v_len = 0, vt_len = 0, vn_len = 0, vp_len = 0, f_len = 0;
-        String line;
         String[] para;
+
         while(file.hasNextLine()){
-            line = file.nextLine();
-            if(line.startsWith("v")) v_len++;
-            if(line.startsWith("vt")) vt_len++;
-            if(line.startsWith("vn")) vn_len++;
-            if(line.startsWith("vp")) vp_len++;
-            if(line.startsWith("f")) f_len++;
+            para = (" " + file.nextLine()).split("\\h+");
+            if(para[1].equals("v")) v_len++;
+            if(para[1].equals("vt")) vt_len++;
+            if(para[1].equals("vn")) vn_len++;
+            if(para[1].equals("vp")) vp_len++;
+            if(para[1].equals("f")) f_len++;
         }
         file.close();
         v = new Vector[v_len];
@@ -63,33 +63,38 @@ public class Obj {
         f = new int[f_len][];
         v_len = 0; vt_len = 0; vn_len = 0; vp_len = 0; f_len = 0;
 
+        String material;
         // NOTE: weight parameter is not considered yet
         while(file.hasNextLine()){
-            para = file.nextLine().split(" ");
-            if(para[0].isEmpty() || para[0].startsWith("#")) continue;
-            if(para[0].equals("v")){
-                // vertex
-                v[v_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
+            para = (" " + file.nextLine()).split("\\h+");
+            if(para.length < 2 || para[1].startsWith("#")) continue;
+
+            if(para[1].equals("usemtl")){
+                material = para[1];
             }
-            if(para[0].equals("vt")){
+            else if(para[1].equals("v")){
+                // vertex
+                v[v_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), Double.parseDouble(para[4]), 1);
+            }
+            else if(para[1].equals("vt")){
                 // texture vertex
                 if(para.length == 2){
-                    vt[vt_len++] = new Vector(Double.parseDouble(para[1]), 1);
+                    vt[vt_len++] = new Vector(Double.parseDouble(para[2]), 1);
                 }
                 else{
-                    vt[vt_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), 1);
+                    vt[vt_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
                 }
             }
-            if(para[0].equals("vn")){
+            else if(para[1].equals("vn")){
                 // normal
-                vn[vn_len++] = new Vector(Double.parseDouble(para[1]), Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
+                vn[vn_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), Double.parseDouble(para[4]), 1);
             }
-            if(para[0].equals("vp")){
+            else if(para[1].equals("vp")){
                 // Free-form geometry statement
             }
-            if(para[0].equals("f")){
+            else if(para[1].equals("f")){
                 // face
-                for(int i = 1; i < para.length; i++){
+                for(int i = 2; i < para.length; i++){
                     String[] features = para[i].split("/");
                     f[f_len] = new int[features.length];
                     for(int j = 0; j < features.length; j++){
@@ -99,7 +104,11 @@ public class Obj {
                         f[f_len][j] = Integer.parseInt(features[j]) - 1;
                     }
                 }
+
+                //mtl[f_len] = material;
+
                 f_len++;
+
             }
         }
 
