@@ -25,7 +25,7 @@ public class Test{
 
         // Parser tests
         // System.out.println(Integer.ParseInt("")); // err
-        // System.out.println("1//3".split("/")[1].isEmpty()); // true
+        // System.out.println("           1                  3".split("\\h+")[0].length());
 
         // array tests
         // System.out.println((new int[2])[0]); // 0
