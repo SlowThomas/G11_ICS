@@ -12,8 +12,6 @@ public class Obj {
     // Consider:
     // rgb as fractions
     // https://www.youtube.com/watch?v=C8YtdC8mxTU
-
-    public String mtl;
     public int[][] f;
     public Vector[] v;
     public Vector[] vt;
@@ -104,8 +102,6 @@ public class Obj {
                         f[f_len][j] = Integer.parseInt(features[j]) - 1;
                     }
                 }
-
-                //mtl[f_len] = material;
 
                 f_len++;
 
