@@ -56,6 +56,9 @@ public class Mtl {
         }
     }
 
+    public double[] get_Ka(int idx){
+        return Ka[idx];
+    }
 
     public double[] get_Ka(String material_name){
         try {
@@ -65,6 +68,10 @@ public class Mtl {
             System.err.printf("Material not found: %s\n", material_name);
             return new double[]{0, 0, 0};
         }
+    }
+
+    public double[] get_Kd(int idx){
+        return Ka[idx];
     }
 
     public double[] get_Kd(String material_name){
@@ -77,7 +84,7 @@ public class Mtl {
         }
     }
 
-    private int find(String material_name){
+    public int find(String material_name){
         for(int i = 0; i < lib.length; i++){
             if(lib[i].equals(material_name)) return i;
         }
