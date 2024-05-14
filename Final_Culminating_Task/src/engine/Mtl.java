@@ -6,7 +6,7 @@ import java.io.File;
 public class Mtl {
     private String[] lib;
     private int[] lib_map;
-    private double[][] Ka, Kd;
+    private double[][] Kd;
 
     public Mtl(String filename){
         Scanner file;
@@ -27,7 +27,6 @@ public class Mtl {
         file.close();
         lib = new String[lib_len];
         lib_map = new int[lib_len];
-        Ka = new double[lib_len][];
         Kd = new double[lib_len][];
 
         lib_len = 0;
@@ -40,13 +39,6 @@ public class Mtl {
                 lib_map[lib_len] = lib_len;
                 lib_len++;
             }
-            // properties
-            else if(para[1].equals("Ka")){
-                Ka[lib_len] = new double[]{
-                        Double.parseDouble(para[2]),
-                        Double.parseDouble(para[3]),
-                        Double.parseDouble(para[4])};
-            }
             else if(para[1].equals("Kd")){
                 Kd[lib_len] = new double[]{
                         Double.parseDouble(para[2]),
@@ -56,22 +48,8 @@ public class Mtl {
         }
     }
 
-    public double[] get_Ka(int idx){
-        return Ka[idx];
-    }
-
-    public double[] get_Ka(String material_name){
-        try {
-            return Ka[find(material_name)];
-        }
-        catch (Exception e){
-            System.err.printf("Material not found: %s\n", material_name);
-            return new double[]{0, 0, 0};
-        }
-    }
-
     public double[] get_Kd(int idx){
-        return Ka[idx];
+        return Kd[idx];
     }
 
     public double[] get_Kd(String material_name){

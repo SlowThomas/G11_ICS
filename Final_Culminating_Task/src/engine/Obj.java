@@ -9,16 +9,14 @@ public class Obj {
         public static double epsilon = 1E-10; // another choice: 1E-14
     }
 
-    // Consider:
-    // rgb as fractions
-    // https://www.youtube.com/watch?v=C8YtdC8mxTU
     public int[][] f;
     public Vector[] v;
-    public Vector[] vt;
-    public Vector[] vn;
-    // public Vector[] vp;
-    public Vector[] colo;
+    public int[] mtl;
+    public Mtl material;
+    
     public Vector pos = new Vector(0, 0, 0, 1);
+    public double zoom = 1;
+    // TODO: Implement zoom matrix
 
     public Matrix T_model = new Matrix(new double[][]{
             {1, 0, 0, 0},
@@ -33,78 +31,56 @@ public class Obj {
             {0, 0, 0, 1}
     }); // world space transformation
 
-    public Obj(String filename){
+    public Obj(String object_name){
+        material = new Mtl("objects/" + object_name + "/obj.mtl");
+
         Scanner file;
         try{
-            file = new Scanner(new File(filename));
+            file = new Scanner(new File("objects/" + object_name + "/tinker.obj"));
         } catch(Exception e){
-            System.err.printf("Cannot find object file: \"%s\"\n", filename);
+            System.err.printf("Cannot find object: \"%s\"\n", object_name);
             return;
         }
 
-        int v_len = 0, vt_len = 0, vn_len = 0, vp_len = 0, f_len = 0;
+        int v_len = 0, f_len = 0;
         String[] para;
 
         while(file.hasNextLine()){
             para = (" " + file.nextLine()).split("\\h+");
             if(para[1].equals("v")) v_len++;
-            if(para[1].equals("vt")) vt_len++;
-            if(para[1].equals("vn")) vn_len++;
-            if(para[1].equals("vp")) vp_len++;
             if(para[1].equals("f")) f_len++;
         }
         file.close();
         v = new Vector[v_len];
-        vt = new Vector[vt_len];
-        vn = new Vector[vn_len];
-        // vp = new Vector[vp_len];
-        f = new int[f_len][];
-        v_len = 0; vt_len = 0; vn_len = 0; vp_len = 0; f_len = 0;
+        f = new int[f_len][3];
+        mtl = new int[f_len];
+        v_len = 0;
+        f_len = 0;
 
-        String material;
-        // NOTE: weight parameter is not considered yet
+        int mtl_idx = 0;
         while(file.hasNextLine()){
             para = (" " + file.nextLine()).split("\\h+");
             if(para.length < 2 || para[1].startsWith("#")) continue;
 
             if(para[1].equals("usemtl")){
-                material = para[1];
+                mtl_idx = material.find(para[2]);
+                if(mtl_idx == -1){
+                    System.err.println("Warning: material " + para[2] + " not found.");
+                }
             }
             else if(para[1].equals("v")){
                 // vertex
                 v[v_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), Double.parseDouble(para[4]), 1);
             }
-            else if(para[1].equals("vt")){
-                // texture vertex
-                if(para.length == 2){
-                    vt[vt_len++] = new Vector(Double.parseDouble(para[2]), 1);
-                }
-                else{
-                    vt[vt_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), 1);
-                }
-            }
-            else if(para[1].equals("vn")){
-                // normal
-                vn[vn_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), Double.parseDouble(para[4]), 1);
-            }
-            else if(para[1].equals("vp")){
-                // Free-form geometry statement
-            }
             else if(para[1].equals("f")){
                 // face
-                for(int i = 2; i < para.length; i++){
-                    String[] features = para[i].split("/");
-                    f[f_len] = new int[features.length];
-                    for(int j = 0; j < features.length; j++){
-                        if(features[j].isEmpty()){
-                            continue;
-                        }
-                        f[f_len][j] = Integer.parseInt(features[j]) - 1;
-                    }
+                // Assume a TinkerCAD object with 3 vertecies each face
+                for(int i = 2; i < 5; i++){
+                    f[f_len][i - 2] = Integer.parseInt(para[i]);
                 }
+                mtl[f_len] = mtl_idx;
 
                 f_len++;
-
             }
         }
 
