@@ -15,8 +15,13 @@ public class Obj {
     public Mtl material;
     
     public Vector pos = new Vector(0, 0, 0, 1);
-    public double zoom = 1;
-    // TODO: Implement zoom matrix
+    public double scale = 1;
+    public Matrix T_scale = new Matrix(new double[][]{
+            {scale, 0, 0, 0},
+            {0, scale, 0, 0},
+            {0, 0, scale, 0},
+            {0, 0, 0, 1}
+    });
 
     public Matrix T_model = new Matrix(new double[][]{
             {1, 0, 0, 0},
@@ -154,6 +159,26 @@ public class Obj {
 
     public void cd(Vector destination){
         translate(destination.subtract(pos));
+    }
+
+    public void set_scale(double scale){
+        this.scale = scale;
+        T_scale = new Matrix(new double[][]{
+                {scale, 0, 0, 0},
+                {0, scale, 0, 0},
+                {0, 0, scale, 0},
+                {0, 0, 0, 1}
+        });
+    }
+
+    public void scale(double scale){
+        this.scale *= scale;
+        T_scale = new Matrix(new double[][]{
+                {this.scale, 0, 0, 0},
+                {0, this.scale, 0, 0},
+                {0, 0, this.scale, 0},
+                {0, 0, 0, 1}
+        });
     }
 
 }
