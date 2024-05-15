@@ -8,49 +8,58 @@ import java.awt.event.*;
 public class Game extends JPanel implements Runnable, KeyListener, MouseListener{
     // Useless Methods
     public void keyTyped(KeyEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
-    public void mouseClicked(MouseEvent e) {}
 
-    private boolean[] pressed_keys = new boolean[91]; // 90 is the keycode for 'Z'
-    private boolean mouse_down = false;
-    private boolean click_triggered = false;
-    private int mouse_x;
-    private int mouse_y;
-    public void keyPressed(KeyEvent e) { if(e.getKeyCode() < 91) pressed_keys[e.getKeyCode()] = true; }
-    public void keyReleased(KeyEvent e) { if(e.getKeyCode() < 91) pressed_keys[e.getKeyCode()] = false; }
-    public void mousePressed(MouseEvent e) { if(e.getButton() == 1) mouse_down = true; mouse_x = e.getX(); mouse_y = e.getY(); }
-    public void mouseReleased(MouseEvent e) { if(e.getButton() == 1) if(mouse_down) click_triggered = true; mouse_down = false; }
-    private boolean mouse_triggered() {if(click_triggered){click_triggered = false; return true;} return false;}
+
 
     // Assets
-    private BufferedImage main_screen;
-    private BufferedImage rules_screen;
-    private BufferedImage controls_screen;
-    private BufferedImage credits_screen;
-    private BufferedImage in_game_placeholder;
-    private BufferedImage game_over_screen;
-    private BufferedImage special_ending_screen;
-    private BufferedImage records_screen;
+    private final BufferedImage main_screen;
+    private final BufferedImage rules_screen;
+    private final BufferedImage controls_screen;
+    private final BufferedImage credits_screen;
+    private final BufferedImage in_game_placeholder;
+    private final BufferedImage game_over_screen;
+    private final BufferedImage special_ending_screen;
+    private final BufferedImage records_screen;
 
     // System Stats
     private int game_state = 0;
+    private final boolean[] pressed_keys = new boolean['z' + 1];
 
 
-    public void run() {
-        while(true){
-            try { Thread.sleep(20); }
-            catch(Exception e){}
-
-            repaint();
+    // Input Handling
+    public void keyPressed(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true; }
+    public void keyReleased(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false; }
+    public void mouseClicked(MouseEvent e) {
+        if(game_state == 0){
+            if(on_button(e, 371, 174, 58, 29)){ game_state = 4; } // start button
+            else if(on_button(e, 368, 233, 64, 29)){ game_state = 1;} // rules button
+            else if(on_button(e, 350, 292, 100, 29)){ game_state = 2;} // controls button
+            else if(on_button(e, 358, 351, 85, 29)){ game_state = 3;} // credits button
+        }
+        else if(game_state == 1 || game_state == 2 || game_state == 3 || game_state == 7){
+            game_state = 0;
+        }
+        else if(game_state == 5 || game_state == 6){
+            game_state = 7;
         }
     }
+    private boolean on_button(MouseEvent e, int x, int y, int width, int height){
+        return e.getButton() == 1 &&
+                e.getX() >= x && e.getX() <= x + width &&
+                e.getY() >= y && e.getY() <= y + height;
+    }
+
 
     public Game() throws IOException{
         setPreferredSize(new Dimension(800, 450));
         // Add KeyListener
         this.setFocusable(true);
         addKeyListener(this);
+        addMouseListener(this);
         // Add Thread
         Thread thread = new Thread(this);
         thread.start();
@@ -66,19 +75,13 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         records_screen = ImageIO.read(new File("img/Records.png"));
     }
 
-    public static void main(String[] args) throws IOException{
-        JFrame frame = new JFrame("Lesson 9 - Gravity");
-        Game panel = new Game();
-        frame.add(panel);
-        frame.pack();
-        frame.setVisible(true);
-    }
+    public void run() {
+        while(true){
+            try { Thread.sleep(20); }
+            catch(Exception e){}
 
-    private boolean clicked_on_button(int x, int y, int width, int height){
-        return mouse_triggered() &&
-                mouse_x >= x && mouse_x <= x + width &&
-                mouse_y >= y && mouse_y <= y + height;
-
+            repaint();
+        }
     }
 
     public void paintComponent(Graphics g){
@@ -86,14 +89,9 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
         if(game_state == 0){
             g.drawImage(main_screen, 0, 0, null);
-            if(clicked_on_button(371, 174, 58, 29)){ game_state = 4; } // start button
-            else if(clicked_on_button(368, 233, 64, 29)){ game_state = 1;} // rules button
-            else if(clicked_on_button(350, 292, 100, 29)){ game_state = 2;} // controls button
-            else if(clicked_on_button(358, 351, 85, 29)){ game_state = 3;} // credits button
         }
         else if(game_state == 1){
             g.drawImage(rules_screen, 0, 0, null);
-            if(mouse_triggered()){}
         }
         else if(game_state == 2){
             g.drawImage(controls_screen, 0, 0, null);
@@ -103,6 +101,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         }
         else if(game_state == 4){
             g.drawImage(in_game_placeholder, 0, 0, null);
+            in_game_event_handler(g);
         }
         else if(game_state == 5){
             g.drawImage(game_over_screen, 0, 0, null);
@@ -116,4 +115,16 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
     }
 
+    private void in_game_event_handler(Graphics g){
+        if(pressed_keys['j']) game_state = 5;
+        else if(pressed_keys['k']) game_state = 6;
+    }
+
+    public static void main(String[] args) throws IOException{
+        JFrame frame = new JFrame("Lesson 9 - Gravity");
+        Game panel = new Game();
+        frame.add(panel);
+        frame.pack();
+        frame.setVisible(true);
+    }
 }
