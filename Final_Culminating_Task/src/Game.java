@@ -14,6 +14,30 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     public void mouseExited(MouseEvent e) {}
 
 
+    public Game() throws IOException{
+        setPreferredSize(new Dimension(800, 450));
+        // Add KeyListener
+        this.setFocusable(true);
+        addKeyListener(this);
+        addMouseListener(this);
+        // Add Thread
+        Thread thread = new Thread(this);
+        thread.start();
+
+        // Load image
+        main_screen = ImageIO.read(new File("img/Main.png"));
+        rules_screen = ImageIO.read(new File("img/Rules.png"));
+        controls_screen = ImageIO.read(new File("img/Controls.png"));
+        credits_screen = ImageIO.read(new File("img/Credits.png"));
+        in_game_placeholder = ImageIO.read(new File("img/In Game Sample.png"));
+        game_over_screen = ImageIO.read(new File("img/Game_Over.png"));
+        special_ending_screen = ImageIO.read(new File("img/Survival.png"));
+        records_screen = ImageIO.read(new File("img/Records.png"));
+
+
+    }
+
+
 
     // Assets
     private final BufferedImage main_screen;
@@ -51,28 +75,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         return e.getButton() == 1 &&
                 e.getX() >= x && e.getX() <= x + width &&
                 e.getY() >= y && e.getY() <= y + height;
-    }
-
-
-    public Game() throws IOException{
-        setPreferredSize(new Dimension(800, 450));
-        // Add KeyListener
-        this.setFocusable(true);
-        addKeyListener(this);
-        addMouseListener(this);
-        // Add Thread
-        Thread thread = new Thread(this);
-        thread.start();
-
-        // Load image
-        main_screen = ImageIO.read(new File("img/Main.png"));
-        rules_screen = ImageIO.read(new File("img/Rules.png"));
-        controls_screen = ImageIO.read(new File("img/Controls.png"));
-        credits_screen = ImageIO.read(new File("img/Credits.png"));
-        in_game_placeholder = ImageIO.read(new File("img/In Game Sample.png"));
-        game_over_screen = ImageIO.read(new File("img/Game_Over.png"));
-        special_ending_screen = ImageIO.read(new File("img/Survival.png"));
-        records_screen = ImageIO.read(new File("img/Records.png"));
     }
 
     public void run() {
