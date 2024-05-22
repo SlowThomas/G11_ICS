@@ -1,10 +1,39 @@
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
+import java.awt.event.*;
 
-public class Test_Panel extends JPanel{
+import algebra.Vector;
+import engine.*;
+
+public class Test_Panel extends JPanel implements Runnable, KeyListener{
+
+    Obj cube = new Obj("3D Object Test");
+    Camera camera = new Camera(0, 0, -10);
+
+    Scene scene = new Scene(new Camera[]{camera}, new Obj[]{cube});
+
+    private final boolean[] pressed_keys = new boolean['z' + 1];
+
+    // Input Handling
+    public void keyPressed(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true; }
+    public void keyReleased(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false; }
 
     public Test_Panel(){
         setPreferredSize(new Dimension(800, 450));
+        // Add KeyListener
+        this.setFocusable(true);
+        addKeyListener(this);
+        // Add Thread
+        Thread thread = new Thread(this);
+        thread.start();
+    }
+
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        g.drawImage(scene.render(), 0, 0, null);
     }
 
     public static void main(String[] args){
@@ -13,5 +42,43 @@ public class Test_Panel extends JPanel{
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void run() {
+        while(true){
+            try { Thread.sleep(20); }
+            catch(Exception e){}
+
+            repaint();
+
+            if(pressed_keys['w']){
+                camera.rotate(new Ray(camera.pos, new Vector(-0.5, 0, 0)));
+            }
+            if(pressed_keys['s']){
+                camera.rotate(new Ray(camera.pos, new Vector(0.5, 0, 0)));
+            }
+            if(pressed_keys['a']){
+                camera.rotate(new Ray(camera.pos, new Vector(0, 0, -0.5)));
+            }
+            if(pressed_keys['d']){
+                camera.rotate(new Ray(camera.pos, new Vector(0, 0, 0.5)));
+            }
+            if(pressed_keys['q']){
+                camera.rotate(new Ray(camera.pos, new Vector(0, 0.5, 0)));
+            }
+            if(pressed_keys['e']){
+                camera.rotate(new Ray(camera.pos, new Vector(0, -0.5, 0)));
+            }
+
+            if(pressed_keys['j']){
+                camera.translate(camera.z_norm);
+            }
+            if(pressed_keys['k']){
+                camera.translate(new Vector(0, 0, 0).subtract(camera.z_norm));
+            }
+        }
     }
 }

@@ -77,10 +77,11 @@ public class Scene {
             return 1 / z;
         }
 
-        private static double[][] getProjected(Obj obj, int[] vertex_idx) {
-            Vector v0 = obj.v[vertex_idx[0]];
-            Vector v1 = obj.v[vertex_idx[1]];
-            Vector v2 = obj.v[vertex_idx[2]];
+        private static double[][] getProjected(Camera camera, Obj obj, int[] vertex_idx) {
+            Vector v0 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[0] - 1])));
+            Vector v1 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[1] - 1])));
+            Vector v2 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[2] - 1])));
+
             double z0 = Math.max(epsilon, v0.at(2));
             double z1 = Math.max(epsilon, v1.at(2));
             double z2 = Math.max(epsilon, v2.at(2));
@@ -94,17 +95,17 @@ public class Scene {
         }
 
         // vertices are transformed into camera space before this
-        public static void rasterize(Obj obj, Screen screen){
+        public static void rasterize(Camera camera, Obj obj, Screen screen){
             //public static void rasterize(Matrix vertices, int color, Screen screen){
             for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
-                double[][] vect2 = getProjected(obj, obj.f[f_idx]);
+                double[][] vect2 = getProjected(camera, obj, obj.f[f_idx]);
 
                 int left = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
                 int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.width);
                 int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
                 int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
 
-                double[] color = obj.material.get_Kd(obj.mtl[f_idx]); // TODO: load color
+                double[] color = obj.material.get_Kd(obj.mtl[f_idx]);
 
                 double z;
                 for(int i = left; i < right; i++){
@@ -113,7 +114,6 @@ public class Scene {
                             z = z_buff(i, j, vect2);
                             if(z >= screen.z_buffer[i][j]) continue;
                             // TODO: Surface normal: point out or point in decides color and visibility
-                            // r, g, b
                             screen.colo[i][j] =
                                         (int)(color[0] * 255) * (1 << 16)
                                     +   (int)(color[1] * 255) * (1 << 8)
@@ -132,13 +132,14 @@ public class Scene {
     private int[] size;
     private int ppi;
     private Obj[] obj_list;
+    private Camera[] cameras;
+    public int view_idx = 0;
 
-    private Screen screen = new Screen(900, 480);
+    private Screen screen = new Screen(800, 450);
 
-    public Scene(int width, int length, int height, int view_distance, int ppi, Obj[] obj_list){
-        this.ppi = ppi;
+    public Scene(Camera[] cameras, Obj[] obj_list){
         this.obj_list = obj_list;
-        this.size = new int[]{width, length, height};
+        this.cameras = cameras;
     }
 
     // canvas declaration: BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
@@ -146,7 +147,7 @@ public class Scene {
         BufferedImage canvas = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
 
         for(Obj obj : obj_list){
-            Algorithm.rasterize(obj, screen);
+            Algorithm.rasterize(cameras[view_idx], obj, screen);
         }
 
         for(int x = 0; x < canvas.getWidth(); x++){

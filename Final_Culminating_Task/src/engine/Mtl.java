@@ -1,5 +1,6 @@
 package engine;
 
+import java.io.IOException;
 import java.util.Scanner;
 import java.io.File;
 
@@ -10,6 +11,7 @@ public class Mtl {
 
     public Mtl(String filename){
         Scanner file;
+
         try{
             file = new Scanner(new File(filename));
         }
@@ -22,9 +24,17 @@ public class Mtl {
         int lib_len = 0;
         while(file.hasNextLine()){
             para = (" " + file.nextLine()).split("\\h+");
+            if(para.length < 2 || para[1].startsWith("#")) continue;
             if(para[1].equals("newmtl")) lib_len++;
         }
         file.close();
+        try{
+            file = new Scanner(new File(filename));
+        }
+        catch(Exception e){
+            System.err.printf("Cannot find material file: \"%s\"\n", filename);
+            return;
+        }
         lib = new String[lib_len];
         lib_map = new int[lib_len];
         Kd = new double[lib_len][];
@@ -40,7 +50,7 @@ public class Mtl {
                 lib_len++;
             }
             else if(para[1].equals("Kd")){
-                Kd[lib_len] = new double[]{
+                Kd[lib_len - 1] = new double[]{
                         Double.parseDouble(para[2]),
                         Double.parseDouble(para[3]),
                         Double.parseDouble(para[4])};
