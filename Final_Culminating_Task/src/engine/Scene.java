@@ -1,5 +1,8 @@
 package engine;
+import java.awt.*;
 import java.awt.image.*;
+import java.nio.Buffer;
+
 import algebra.*;
 
 
@@ -39,6 +42,15 @@ public class Scene {
     private static class Algorithm {
         private static final double epsilon = Consts.epsilon;
 
+        private static double[] barycentric(double x, double y, double[][] triangle){
+            // barycentric coordinate
+            double t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
+            double l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
+            double l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
+            double l3 = Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
+            return new double[]{l1, l2, l3};
+        }
+
         public static boolean edgeFunction(double ax, double ay, double bx, double by, double px, double py) {
             return (px - ax) * (by - ay) - (py - ay) * (bx - ax) >= 0;
         }
@@ -65,53 +77,10 @@ public class Scene {
             return 1 / z;
         }
 
-        // vertices are transformed into camera space before this
-        public static void rasterize(Obj obj, Screen screen){
-            //public static void rasterize(Matrix vertices, int color, Screen screen){
-            for(int[] features : obj.f){
-                // TODO: partition face into triangles
-                double[][] vect2 = getProjected(obj, features);
-
-                int left = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
-                int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.width);
-                int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
-                int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
-
-                double[][] color = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}; // TODO: load color
-
-                double z;
-                for(int i = left; i < right; i++){
-                    for(int j = top; j < bottom; j++){
-                        if(point_in_triangle(i, j, vect2)){
-                            z = z_buff(i, j, vect2);
-                            if(z >= screen.z_buffer[i][j]) continue;
-                            double[] weight = barycentric(i, j, vect2);
-                            // TODO: Surface normal: point out or point in decides color and visibility
-                            // r, g, b
-                            screen.colo[i][j] =
-                                    (int)((weight[0] * color[0][0] + weight[1] * color[1][0] + weight[2] * color[2][0]) * 255 ) * (1<<15) + // r
-                                    (int)((weight[0] * color[0][1] + weight[1] * color[1][1] + weight[2] * color[2][1]) * 255) * (1<<8) + // g
-                                    (int)((weight[0] * color[0][2] + weight[1] * color[1][2] + weight[2] * color[2][2]) * 255); // b
-                            screen.z_buffer[i][j] = z;
-                        }
-                    }
-                }
-            }
-        }
-
-        private static double[] barycentric(double x, double y, double[][] triangle){
-            // barycentric coordinate
-            double t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
-            double l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
-            double l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
-            double l3 = Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
-            return new double[]{l1, l2, l3};
-        }
-
-        private static double[][] getProjected(Obj obj, int[] features) {
-            Vector v0 = obj.v[features[0]];
-            Vector v1 = obj.v[features[1]];
-            Vector v2 = obj.v[features[2]];
+        private static double[][] getProjected(Obj obj, int[] vertex_idx) {
+            Vector v0 = obj.v[vertex_idx[0]];
+            Vector v1 = obj.v[vertex_idx[1]];
+            Vector v2 = obj.v[vertex_idx[2]];
             double z0 = Math.max(epsilon, v0.at(2));
             double z1 = Math.max(epsilon, v1.at(2));
             double z2 = Math.max(epsilon, v2.at(2));
@@ -123,6 +92,38 @@ public class Scene {
             };
             return vect2;
         }
+
+        // vertices are transformed into camera space before this
+        public static void rasterize(Obj obj, Screen screen){
+            //public static void rasterize(Matrix vertices, int color, Screen screen){
+            for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
+                double[][] vect2 = getProjected(obj, obj.f[f_idx]);
+
+                int left = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
+                int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.width);
+                int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
+                int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
+
+                double[] color = obj.material.get_Kd(obj.mtl[f_idx]); // TODO: load color
+
+                double z;
+                for(int i = left; i < right; i++){
+                    for(int j = top; j < bottom; j++){
+                        if(point_in_triangle(i, j, vect2)){
+                            z = z_buff(i, j, vect2);
+                            if(z >= screen.z_buffer[i][j]) continue;
+                            // TODO: Surface normal: point out or point in decides color and visibility
+                            // r, g, b
+                            screen.colo[i][j] =
+                                        (int)(color[0] * 255) * (1 << 16)
+                                    +   (int)(color[1] * 255) * (1 << 8)
+                                    +   (int)(color[2] * 255);
+                            screen.z_buffer[i][j] = z;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Consider:
@@ -132,7 +133,7 @@ public class Scene {
     private int ppi;
     private Obj[] obj_list;
 
-    private Screen screen;
+    private Screen screen = new Screen(900, 480);
 
     public Scene(int width, int length, int height, int view_distance, int ppi, Obj[] obj_list){
         this.ppi = ppi;
@@ -141,8 +142,9 @@ public class Scene {
     }
 
     // canvas declaration: BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
-    public void render(BufferedImage canvas){
-        
+    public BufferedImage render(){
+        BufferedImage canvas = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
+
         for(Obj obj : obj_list){
             Algorithm.rasterize(obj, screen);
         }
@@ -153,5 +155,6 @@ public class Scene {
             }
         }
 
+        return canvas;
     }
 }
