@@ -21,16 +21,11 @@ public class Record_Board {
         fin.close();
     }
 
-    public String[] get_scores(){
-        String[] out = new String[3];
-        for(int i = 0; i < 3; i++){
-            if(scores[i] == -1) {
-                out[i] = "-";
-                continue;
-            }
-            out[i] = "" + scores[i];
+    public String get_score(int idx){
+        if(scores[idx] == -1) {
+            return "-";
         }
-        return out;
+        return "" + scores[idx];
     }
 
     public boolean record(int score, boolean survived){ // returns whether new record is achieved

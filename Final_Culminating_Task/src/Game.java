@@ -33,8 +33,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         game_over_screen = ImageIO.read(new File("img/Game_Over.png"));
         special_ending_screen = ImageIO.read(new File("img/Survival.png"));
         records_screen = ImageIO.read(new File("img/Records.png"));
-
-
     }
 
 
@@ -53,6 +51,9 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     private int game_state = 0;
     private final boolean[] pressed_keys = new boolean['z' + 1];
 
+    private final Record_Board record_board = new Record_Board();
+    private int score;
+    private boolean new_high;
 
     // Input Handling
     public void keyPressed(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true; }
@@ -113,13 +114,40 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         }
         else if(game_state == 7){
             g.drawImage(records_screen, 0, 0, null);
+            g.setColor(new Color(255, 255, 255));
+            g.setFont(new Font("Courier New", Font.PLAIN, 28));
+            g.drawString(record_board.get_score(0), 351, 234);
+            g.drawString(record_board.get_score(1), 351, 276);
+            g.drawString(record_board.get_score(2), 351, 318);
+
+            g.setColor(new Color(255, 0, 0));
+            g.setFont(new Font("Courier New", Font.PLAIN, 21));
+            if(record_board.survived[0]) g.drawString("survived!", 400, 230);
+            if(record_board.survived[1]) g.drawString("survived!", 400, 272);
+            if(record_board.survived[2]) g.drawString("survived!", 400, 314);
+
+            g.setColor(new Color(255, 255, 255));
+            g.setFont(new Font("Courier New", Font.PLAIN, 28));
+            g.drawString("" + score, 405, 370);
+
+            g.setColor(new Color(255, 0, 0));
+            g.setFont(new Font("Courier New", Font.BOLD, 21));
+            if(new_high) g.drawString("new record!", 333, 150);
         }
 
     }
 
     private void in_game_event_handler(Graphics g){
-        if(pressed_keys['j']) game_state = 5;
-        else if(pressed_keys['k']) game_state = 6;
+        score = 0;
+
+        if(pressed_keys['j']){
+            game_state = 5;
+            new_high = record_board.record(score, false);
+        }
+        else if(pressed_keys['k']){
+            game_state = 6;
+            new_high = record_board.record(score, true);
+        }
     }
 
     public static void main(String[] args) throws IOException{
