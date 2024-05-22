@@ -9,13 +9,7 @@ import algebra.*;
 public class Scene {
 
     private static class Consts {
-        // MacBook Air display: 13.3-inch 1440 × 900
-        public static int width = 1440;
-        public static int height = 900;
-        public static double size = 13.3; // in inch
-        public static int ppi = (int)(Math.sqrt(width * width + height * height) / size) + 1;
-
-        public static double distance = 30; // in inch
+        public static double distance = 2000; // in pixel
         // taken the midpoint in the range of recommended eye-screen distance
         public static double view_distance = 10000; // in inch, about 0.25 km
 
@@ -77,7 +71,7 @@ public class Scene {
             return 1 / z;
         }
 
-        private static double[][] getProjected(Camera camera, Obj obj, int[] vertex_idx) {
+        private static double[][] getProjected(Camera camera, Obj obj, Screen screen, int[] vertex_idx) {
             Vector v0 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[0] - 1])));
             Vector v1 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[1] - 1])));
             Vector v2 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[2] - 1])));
@@ -86,30 +80,37 @@ public class Scene {
             double z1 = Math.max(epsilon, v1.at(2));
             double z2 = Math.max(epsilon, v2.at(2));
 
-            double[][] vect2 = {
-                    {Consts.distance * v0.at(0) / z0, Consts.distance * v1.at(0) / z1, Consts.distance * v2.at(0) / z2},
-                    {Consts.distance * v0.at(1) / z0, Consts.distance * v1.at(1) / z1, Consts.distance * v2.at(1) / z2},
+            return new double[][]{
+                    {
+                        Consts.distance * (v0.at(0) + (double)screen.width / 2) / z0,
+                        Consts.distance * (v1.at(0) + (double)screen.width / 2) / z1,
+                        Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2
+                    },
+                    {
+                        Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
+                        Consts.distance * ((double)screen.height / 2 - v1.at(1)) / z1,
+                        Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2
+                    },
                     {z0, z1, z2}
             };
-            return vect2;
         }
 
         // vertices are transformed into camera space before this
         public static void rasterize(Camera camera, Obj obj, Screen screen){
             //public static void rasterize(Matrix vertices, int color, Screen screen){
             for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
-                double[][] vect2 = getProjected(camera, obj, obj.f[f_idx]);
+                double[][] vect2 = getProjected(camera, obj, screen, obj.f[f_idx]);
 
-                int left = Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0);
-                int right = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.width);
-                int top = Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0);
-                int bottom = Math.min((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), screen.height);
+                int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0), screen.width - 1);
+                int right = Math.min(Math.max((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.width - 1);
+                int top = Math.min(Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.height - 1);
+                int bottom = Math.min(Math.max((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.height - 1);
 
                 double[] color = obj.material.get_Kd(obj.mtl[f_idx]);
 
                 double z;
-                for(int i = left; i < right; i++){
-                    for(int j = top; j < bottom; j++){
+                for(int i = left; i <= right; i++){
+                    for(int j = top; j <= bottom; j++){
                         if(point_in_triangle(i, j, vect2)){
                             z = z_buff(i, j, vect2);
                             if(z >= screen.z_buffer[i][j]) continue;
@@ -126,11 +127,7 @@ public class Scene {
         }
     }
 
-    // Consider:
-    // Light intensity
 
-    private int[] size;
-    private int ppi;
     private Obj[] obj_list;
     private Camera[] cameras;
     public int view_idx = 0;
@@ -144,7 +141,7 @@ public class Scene {
 
     // canvas declaration: BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
     public BufferedImage render(){
-        BufferedImage canvas = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
 
         for(Obj obj : obj_list){
             Algorithm.rasterize(cameras[view_idx], obj, screen);

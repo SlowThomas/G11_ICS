@@ -72,7 +72,7 @@ public class Camera {
         });
 
         T = Trans.dot(T);
-        pos = T.dot(pos);
+        pos = Trans.dot(pos);
 
         T_inverse = T.inverse();
         x_norm = new Vector(T.at(0, 0), T.at(1, 0), T.at(2, 0));
@@ -121,7 +121,7 @@ public class Camera {
         });
 
         T = Trans.dot(T);
-        pos = T.dot(pos);
+        pos = Trans.dot(pos);
 
         T_inverse = T.inverse();
         x_norm = new Vector(T.at(0, 0), T.at(1, 0), T.at(2, 0));
@@ -138,7 +138,7 @@ public class Camera {
         });
 
         T = Trans.dot(T);
-        pos = T.dot(pos);
+        pos = Trans.dot(pos);
 
         T_inverse = T.inverse();
         x_norm = new Vector(T.at(0, 0), T.at(1, 0), T.at(2, 0));

@@ -11,7 +11,7 @@ import engine.*;
 public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
     Obj cube = new Obj("3D Object Test");
-    Camera camera = new Camera(0, 0, -10);
+    Camera camera = new Camera(0, 0, 0);
 
     Scene scene = new Scene(new Camera[]{camera}, new Obj[]{cube});
 
@@ -29,11 +29,15 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         // Add Thread
         Thread thread = new Thread(this);
         thread.start();
+
+        cube.scale(10);
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
+
         g.drawImage(scene.render(), 0, 0, null);
+        g.drawString("" + (int)camera.pos.at(0) + ", " + (int)camera.pos.at(1) + ", " + (int)camera.pos.at(2), 100, 100);
     }
 
     public static void main(String[] args){
@@ -74,10 +78,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
             }
 
             if(pressed_keys['j']){
-                camera.translate(camera.z_norm);
+                camera.translate(new Vector(0, 0, 0.5));
             }
             if(pressed_keys['k']){
-                camera.translate(new Vector(0, 0, 0).subtract(camera.z_norm));
+                camera.translate(new Vector(0, 0, -0.5));
             }
         }
     }
