@@ -30,13 +30,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         Thread thread = new Thread(this);
         thread.start();
 
-        cube.scale(10);
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
         g.drawImage(scene.render(), 0, 0, null);
+        g.setColor(new Color(255));
         g.drawString("" + (int)camera.pos.at(0) + ", " + (int)camera.pos.at(1) + ", " + (int)camera.pos.at(2), 100, 100);
     }
 
@@ -58,30 +58,32 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
             repaint();
 
+            double rot_speed = 0.1;
+
             if(pressed_keys['w']){
-                camera.rotate(new Ray(camera.pos, new Vector(-0.5, 0, 0)));
+                camera.rotate(camera.x_norm, -rot_speed);
             }
             if(pressed_keys['s']){
-                camera.rotate(new Ray(camera.pos, new Vector(0.5, 0, 0)));
+                camera.rotate(camera.x_norm, rot_speed);
             }
             if(pressed_keys['a']){
-                camera.rotate(new Ray(camera.pos, new Vector(0, 0, -0.5)));
+                camera.rotate(camera.z_norm, -rot_speed);
             }
             if(pressed_keys['d']){
-                camera.rotate(new Ray(camera.pos, new Vector(0, 0, 0.5)));
+                camera.rotate(camera.z_norm, rot_speed);
             }
             if(pressed_keys['q']){
-                camera.rotate(new Ray(camera.pos, new Vector(0, 0.5, 0)));
+                camera.rotate(camera.y_norm, rot_speed);
             }
             if(pressed_keys['e']){
-                camera.rotate(new Ray(camera.pos, new Vector(0, -0.5, 0)));
+                camera.rotate(camera.y_norm, -rot_speed);
             }
 
             if(pressed_keys['j']){
-                camera.translate(new Vector(0, 0, 0.5));
+                camera.move(camera.z_norm);
             }
             if(pressed_keys['k']){
-                camera.translate(new Vector(0, 0, -0.5));
+                camera.move(camera.z_norm.mult(-1));
             }
         }
     }

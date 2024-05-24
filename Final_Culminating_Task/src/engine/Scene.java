@@ -113,7 +113,7 @@ public class Scene {
                     for(int j = top; j <= bottom; j++){
                         if(point_in_triangle(i, j, vect2)){
                             z = z_buff(i, j, vect2);
-                            if(z >= screen.z_buffer[i][j]) continue;
+                            //if(z >= screen.z_buffer[i][j]) continue;
                             // TODO: Surface normal: point out or point in decides color and visibility
                             screen.colo[i][j] =
                                         (int)(color[0] * 255) * (1 << 16)

@@ -66,6 +66,13 @@ public class Vector {
         return new Vector(v);
     }
 
+    public Vector mult(double n){
+        double[] v = new double[shape];
+        for(int i = 0; i < shape; i++)
+            v[i] = n * body[i];
+        return new Vector(v);
+    }
+
     public double at(int i){
         return body[i];
     }

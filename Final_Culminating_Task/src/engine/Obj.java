@@ -94,99 +94,33 @@ public class Obj {
     }
 
     // world space transformation
-    public void transform(Vector trail, Ray axle){
-        // Note: length of the axle's direction vector determines the angle
+    public void rotate(Vector axis, double angle){
+        if(axis.mag < Consts.epsilon) return;
 
-        // theta - angle in radian counter-clockwise around the axle
-        // u - normalized axle of rotation
-        // c - position of the axle
-        // d - displacement after the rotation
-        double theta = axle.dir.mag;
+        // pre-compute common terms
+        double ux = axis.at(0) / axis.mag;
+        double uy = axis.at(1) / axis.mag;
+        double uz = axis.at(2) / axis.mag;
+        double x = pos.at(0);
+        double y = pos.at(1);
+        double z = pos.at(2);
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+        double component_product = x*ux + y*uy + z*uz;
 
-        if(Math.abs(theta) < Consts.epsilon){
-            translate(trail);
-            return;
-        }
-
-        double ux = axle.dir.at(0) / theta;
-        double uy = axle.dir.at(1) / theta;
-        double uz = axle.dir.at(2) / theta;
-        double cx = axle.pos.at(0);
-        double cy = axle.pos.at(1);
-        double cz = axle.pos.at(2);
-        double dx = trail.at(0);
-        double dy = trail.at(1);
-        double dz = trail.at(2);
-
-        double x11 = Math.cos(theta) + ux*ux*(1 - Math.cos(theta));
-        double x12 = ux*uy*(1 - Math.cos(theta)) - uz*Math.sin(theta);
-        double x13 = ux*uz*(1 - Math.cos(theta)) + uy*Math.sin(theta);
-        double x21 = uy*ux*(1 - Math.cos(theta)) + uz*Math.sin(theta);
-        double x22 = Math.cos(theta) + uy*uy*(1 - Math.cos(theta));
-        double x23 = uy*uz*(1 - Math.cos(theta)) - ux*Math.sin(theta);
-        double x31 = uz*ux*(1 - Math.cos(theta)) - uy*Math.sin(theta);
-        double x32 = uz*uy*(1 - Math.cos(theta)) + ux*Math.sin(theta);
-        double x33 = Math.cos(theta) + uz*uz*(1 - Math.cos(theta));
-
-        // Translation matrix
-        // use Rodrigues’ rotation formula combined with translations
-        // rotate before translation
-        Matrix T = new Matrix(new double[][]{
-                {x11, x12, x13, (1 - Math.cos(theta)) * (ux*uz*cy - uy*uz*cx) + uz*Math.sin(theta)*cy - uy*Math.sin(theta)*cz + cx + dx},
-                {x21, x22, x23, (1 - Math.cos(theta)) * (uy*uz*cx - ux*uz*cy) + uz*Math.sin(theta)*cx - ux*Math.sin(theta)*cz + cy + dy},
-                {x31, x32, x33, (1 - Math.cos(theta)) * (ux*uy*cz - ux*uz*cy) + uy*Math.sin(theta)*cz - uz*Math.sin(theta)*cx + cz + dz},
+        // Rotation matrix
+        // https://en.wikipedia.org/wiki/Rotation_matrix
+        Matrix T_rotate = new Matrix(new double[][]{
+                {cos + ux*ux*(1-cos),           ux*uy*(1-cos)-uz*sin,       ux*uz*(1-cos) + uy*sin,     sin*(y*uz - z*uy) - (1 - cos) * ux * component_product + x * (1 - cos)},
+                {uy*ux*(1 - cos) + uz * sin,    cos + uy*uy*(1 - cos),      uy*uz*(1 - cos) - ux*sin,   sin*(z*ux - x*uz) - (1 - cos) * uy * component_product + y * (1 - cos)},
+                {uz*ux*(1 - cos) - uy*sin,      uz*uy*(1 - cos) + ux*sin,   cos + uz*uz*(1 - cos),      sin*(x*uy - y*ux) - (1 - cos) * uz * component_product + z * (1 - cos)},
                 {0, 0, 0, 1}
         });
 
-        T_world = T.dot(T_world);
-        pos = T.dot(pos);
+        T_world = T_rotate.dot(T_world);
     }
 
-    public void rotate(Ray axle){
-        // Note: length of the axle's direction vector determines the angle
-
-        // theta - angle in radian counter-clockwise around the axle
-        // u - normalized axle of rotation
-        // c - position of the axle
-        // d - displacement after the rotation
-        double theta = axle.dir.mag;
-
-        if(Math.abs(theta) < Consts.epsilon){
-            return;
-        }
-
-        double ux = axle.dir.at(0) / theta;
-        double uy = axle.dir.at(1) / theta;
-        double uz = axle.dir.at(2) / theta;
-        double cx = axle.pos.at(0);
-        double cy = axle.pos.at(1);
-        double cz = axle.pos.at(2);
-
-        double x11 = Math.cos(theta) + ux*ux*(1 - Math.cos(theta));
-        double x12 = ux*uy*(1 - Math.cos(theta)) - uz*Math.sin(theta);
-        double x13 = ux*uz*(1 - Math.cos(theta)) + uy*Math.sin(theta);
-        double x21 = uy*ux*(1 - Math.cos(theta)) + uz*Math.sin(theta);
-        double x22 = Math.cos(theta) + uy*uy*(1 - Math.cos(theta));
-        double x23 = uy*uz*(1 - Math.cos(theta)) - ux*Math.sin(theta);
-        double x31 = uz*ux*(1 - Math.cos(theta)) - uy*Math.sin(theta);
-        double x32 = uz*uy*(1 - Math.cos(theta)) + ux*Math.sin(theta);
-        double x33 = Math.cos(theta) + uz*uz*(1 - Math.cos(theta));
-
-        // Translation matrix
-        // use Rodrigues’ rotation formula combined with translations
-        // rotate before translation
-        Matrix T = new Matrix(new double[][]{
-                {x11, x12, x13, (1 - Math.cos(theta)) * (ux*uz*cy - uy*uz*cx) + uz*Math.sin(theta)*cy - uy*Math.sin(theta)*cz + cx},
-                {x21, x22, x23, (1 - Math.cos(theta)) * (uy*uz*cx - ux*uz*cy) + uz*Math.sin(theta)*cx - ux*Math.sin(theta)*cz + cy},
-                {x31, x32, x33, (1 - Math.cos(theta)) * (ux*uy*cz - ux*uz*cy) + uy*Math.sin(theta)*cz - uz*Math.sin(theta)*cx + cz},
-                {0, 0, 0, 1}
-        });
-
-        T_world = T.dot(T_world);
-        pos = T.dot(pos);
-    }
-
-    public void translate(Vector trail){
+    public void move(Vector trail){
         Matrix T = new Matrix(new double[][]{
                 {1, 0, 0, trail.at(0)},
                 {0, 1, 0, trail.at(1)},
@@ -198,8 +132,20 @@ public class Obj {
         pos = T.dot(pos);
     }
 
+    public void move(double x, double y, double z){
+        Matrix T = new Matrix(new double[][]{
+                {1, 0, 0, x},
+                {0, 1, 0, y},
+                {0, 0, 1, z},
+                {0, 0, 0, 1}
+        });
+
+        T_world = T.dot(T_world);
+        pos = T.dot(pos);
+    }
+
     public void cd(Vector destination){
-        translate(destination.subtract(pos));
+        move(destination.subtract(pos));
     }
 
     public void scale(double scale){
