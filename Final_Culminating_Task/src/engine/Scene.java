@@ -22,12 +22,14 @@ public class Scene {
     private static class Screen{
         public int[][] colo;
         public double[][] z_buffer;
+        public boolean[][] z_buffed;
         public int width;
         public int height;
 
         public Screen(int width, int height){
             colo = new int[width][height];
             z_buffer = new double[width][height];
+            z_buffed = new boolean[width][height];
             this.width = width;
             this.height = height;
         }
@@ -88,6 +90,7 @@ public class Scene {
             double z2 = Math.max(epsilon, v2.at(2));
 
             return new double[][]{
+                    /*
                     {
                         Consts.distance * (v0.at(0) + (double)screen.width / 2) / z0,
                         Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
@@ -102,6 +105,22 @@ public class Scene {
                         Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2,
                         Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2,
                         z2
+                    }
+                     */
+                    {
+                            (double)screen.width / 2 + Consts.distance * v0.at(0) / z0,
+                            (double)screen.height / 2 - Consts.distance * v0.at(1) / z0,
+                            z0
+                    },
+                    {
+                            (double)screen.width / 2 + Consts.distance * v1.at(0) / z1,
+                            (double)screen.height / 2 - Consts.distance * v1.at(1) / z1,
+                            z1
+                    },
+                    {
+                            (double)screen.width / 2 + Consts.distance * v2.at(0) / z2,
+                            (double)screen.height / 2 - Consts.distance * v2.at(1) / z2,
+                            z2
                     }
             };
         }
@@ -124,13 +143,14 @@ public class Scene {
                     for(int j = top; j <= bottom; j++){
                         if(point_in_triangle(i, j, vect2)){
                             z = z_buff(i, j, vect2);
-                            //if(z >= screen.z_buffer[i][j]) continue;
+                            if(screen.z_buffed[i][j] && z >= screen.z_buffer[i][j]) continue;
                             // TODO: Surface normal: point out or point in decides color and visibility
                             screen.colo[i][j] =
                                         (int)(color[0] * 255) * (1 << 16)
                                     +   (int)(color[1] * 255) * (1 << 8)
                                     +   (int)(color[2] * 255);
                             screen.z_buffer[i][j] = z;
+                            screen.z_buffed[i][j] = true;
                         }
                     }
                 }

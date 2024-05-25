@@ -11,9 +11,10 @@ import engine.*;
 public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
     Obj cube = new Obj("3D Object Test");
+    Obj plane = new Obj("Starship");
     Camera camera = new Camera(0, 0, 0);
 
-    Scene scene = new Scene(new Camera[]{camera}, new Obj[]{cube});
+    Scene scene = new Scene(new Camera[]{camera}, new Obj[]{cube, plane});
 
     private final boolean[] pressed_keys = new boolean['z' + 1];
 
@@ -30,6 +31,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         Thread thread = new Thread(this);
         thread.start();
 
+        plane.cd(new Vector(0, 0, 100, 1));
     }
 
     public void paintComponent(Graphics g){
@@ -58,8 +60,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
             repaint();
 
-            double rot_speed = 0.1;
+            double rot_speed = 0.01;
             double zoom = 1.1;
+            double speed = 10;
 
             if(pressed_keys['l']){
                 cube.scale(zoom);
@@ -69,29 +72,29 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
             }
 
             if(pressed_keys['w']){
-                camera.rotate(camera.x_norm, -rot_speed);
-            }
-            if(pressed_keys['s']){
                 camera.rotate(camera.x_norm, rot_speed);
             }
-            if(pressed_keys['a']){
-                camera.rotate(camera.z_norm, -rot_speed);
+            if(pressed_keys['s']){
+                camera.rotate(camera.x_norm, -rot_speed);
             }
-            if(pressed_keys['d']){
+            if(pressed_keys['a']){
                 camera.rotate(camera.z_norm, rot_speed);
             }
+            if(pressed_keys['d']){
+                camera.rotate(camera.z_norm, -rot_speed);
+            }
             if(pressed_keys['q']){
-                camera.rotate(camera.y_norm, rot_speed);
+                camera.rotate(camera.y_norm, -rot_speed);
             }
             if(pressed_keys['e']){
-                camera.rotate(camera.y_norm, -rot_speed);
+                camera.rotate(camera.y_norm, rot_speed);
             }
 
             if(pressed_keys['j']){
-                camera.move(camera.z_norm);
+                camera.move(camera.z_norm.mult(speed));
             }
             if(pressed_keys['k']){
-                camera.move(camera.z_norm.mult(-1));
+                camera.move(camera.z_norm.mult(-speed));
             }
         }
     }
