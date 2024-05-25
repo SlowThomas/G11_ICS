@@ -1,7 +1,5 @@
 package engine;
-import java.awt.*;
-import java.awt.image.*;
-import java.nio.Buffer;
+import java.awt.image.BufferedImage;
 
 import algebra.*;
 
@@ -39,7 +37,6 @@ public class Scene {
        private static final double epsilon = Consts.epsilon;
 
         private static double[] barycentric(double x, double y, double[][] triangle){
-            // barycentric coordinate
             double t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
             double l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
             double l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
@@ -52,17 +49,6 @@ public class Scene {
         }
 
         public static boolean point_in_triangle(double px, double py, double[][] triangle){
-            // inside &= edgeFunction(V0, V1, p);
-            // inside &= edgeFunction(V1, V2, p);
-            // inside &= edgeFunction(V2, V0, p);
-            /*
-            boolean inside = true;
-            inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
-            inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
-            inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
-            return inside;
-             */
-
             boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
             boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
             boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
@@ -90,23 +76,6 @@ public class Scene {
             double z2 = Math.max(epsilon, v2.at(2));
 
             return new double[][]{
-                    /*
-                    {
-                        Consts.distance * (v0.at(0) + (double)screen.width / 2) / z0,
-                        Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
-                        z0
-                    },
-                    {
-                        Consts.distance * (v1.at(0) + (double)screen.width / 2) / z1,
-                        Consts.distance * ((double)screen.height / 2 - v1.at(1)) / z1,
-                        z1
-                    },
-                    {
-                        Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2,
-                        Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2,
-                        z2
-                    }
-                     */
                     {
                             (double)screen.width / 2 + Consts.distance * v0.at(0) / z0,
                             (double)screen.height / 2 - Consts.distance * v0.at(1) / z0,
@@ -125,9 +94,7 @@ public class Scene {
             };
         }
 
-        // vertices are transformed into camera space before this
         public static void rasterize(Camera camera, Obj obj, Screen screen){
-            //public static void rasterize(Matrix vertices, int color, Screen screen){
             for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
                 double[][] vect2 = getProjected(camera, obj, screen, obj.f[f_idx]);
 
@@ -163,18 +130,16 @@ public class Scene {
     private Camera[] cameras;
     public int view_idx = 0;
 
-    private Screen screen = new Screen(800, 450);
+    private Screen screen;
 
     public Scene(Camera[] cameras, Obj[] obj_list){
         this.obj_list = obj_list;
         this.cameras = cameras;
     }
 
-    // canvas declaration: BufferedImage img = new BufferedImage(Consts.width, Consts.height, BufferedImage.TYPE_INT_RGB);
     public BufferedImage render(){
-        BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
-
         flush();
+        BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
 
         for(Obj obj : obj_list){
             Algorithm.rasterize(cameras[view_idx], obj, screen);
@@ -190,6 +155,6 @@ public class Scene {
     }
 
     public void flush(){
-        this.screen = new Screen(800, 450);
+        screen = new Screen(800, 450);
     }
 }
