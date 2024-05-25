@@ -88,6 +88,7 @@ public class Scene {
             double z2 = Math.max(epsilon, v2.at(2));
 
             return new double[][]{
+                    /*
                     {
                         Consts.distance * (v0.at(0) + (double)screen.width / 2) / z0,
                         Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
@@ -102,6 +103,22 @@ public class Scene {
                         Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2,
                         Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2,
                         z2
+                    }
+                     */
+                    {
+                            (double)screen.width / 2 + Consts.distance * v0.at(0) / z0,
+                            (double)screen.height / 2 - Consts.distance * v0.at(1) / z0,
+                            z0
+                    },
+                    {
+                            (double)screen.width / 2 + Consts.distance * v1.at(0) / z1,
+                            (double)screen.height / 2 - Consts.distance * v1.at(1) / z1,
+                            z1
+                    },
+                    {
+                            (double)screen.width / 2 + Consts.distance * v2.at(0) / z2,
+                            (double)screen.height / 2 - Consts.distance * v2.at(1) / z2,
+                            z2
                     }
             };
         }
