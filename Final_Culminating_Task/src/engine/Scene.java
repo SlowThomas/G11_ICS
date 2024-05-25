@@ -50,13 +50,17 @@ public class Scene {
         }
 
         public static boolean point_in_triangle(double px, double py, double[][] triangle){
-            boolean inside = true;
             // inside &= edgeFunction(V0, V1, p);
             // inside &= edgeFunction(V1, V2, p);
             // inside &= edgeFunction(V2, V0, p);
-            // inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
-            // inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
-            // inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+            /*
+            boolean inside = true;
+            inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
+            inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
+            inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+            return inside;
+             */
+
             boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
             boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
             boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
@@ -86,15 +90,19 @@ public class Scene {
             return new double[][]{
                     {
                         Consts.distance * (v0.at(0) + (double)screen.width / 2) / z0,
-                        Consts.distance * (v1.at(0) + (double)screen.width / 2) / z1,
-                        Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2
+                        Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
+                        z0
                     },
                     {
-                        Consts.distance * ((double)screen.height / 2 - v0.at(1)) / z0,
+                        Consts.distance * (v1.at(0) + (double)screen.width / 2) / z1,
                         Consts.distance * ((double)screen.height / 2 - v1.at(1)) / z1,
-                        Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2
+                        z1
                     },
-                    {z0, z1, z2}
+                    {
+                        Consts.distance * (v2.at(0) + (double)screen.width / 2) / z2,
+                        Consts.distance * ((double)screen.height / 2 - v2.at(1)) / z2,
+                        z2
+                    }
             };
         }
 
@@ -104,10 +112,10 @@ public class Scene {
             for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
                 double[][] vect2 = getProjected(camera, obj, screen, obj.f[f_idx]);
 
-                int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[0][1]), vect2[0][2]), 0), screen.width - 1);
-                int right = Math.min(Math.max((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.width - 1);
-                int top = Math.min(Math.max((int)Math.min(Math.min(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.height - 1);
-                int bottom = Math.min(Math.max((int)Math.max(Math.max(vect2[1][0], vect2[1][1]), vect2[1][2]), 0), screen.height - 1);
+                int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
+                int right = Math.min(Math.max((int)Math.max(Math.max(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
+                int top = Math.min(Math.max((int)Math.min(Math.min(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
+                int bottom = Math.min(Math.max((int)Math.max(Math.max(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
 
                 double[] color = obj.material.get_Kd(obj.mtl[f_idx]);
 
