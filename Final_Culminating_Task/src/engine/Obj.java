@@ -77,7 +77,7 @@ public class Obj {
             }
             else if(para[1].equals("v")){
                 // vertex
-                v[v_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[3]), Double.parseDouble(para[4]), 1);
+                v[v_len++] = new Vector(Double.parseDouble(para[2]), Double.parseDouble(para[4]), -Double.parseDouble(para[3]), 1);
             }
             else if(para[1].equals("f")){
                 // face
