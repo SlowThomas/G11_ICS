@@ -39,7 +39,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
         g.drawImage(scene.render(), 0, 0, null);
         g.setColor(new Color(255));
-        g.drawString("" + (int)camera.pos.at(0) + ", " + (int)camera.pos.at(1) + ", " + (int)camera.pos.at(2), 100, 100);
+        g.drawString((int)camera.pos.at(0) + ", " + (int)camera.pos.at(1) + ", " + (int)camera.pos.at(2), 100, 100);
     }
 
     public static void main(String[] args){
