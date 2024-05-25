@@ -1,6 +1,6 @@
 package algebra;
 
-public class Vector {
+public class Vector extends Object{
     public int shape;
     public double mag;
     protected double[] body;
@@ -75,5 +75,15 @@ public class Vector {
 
     public double at(int i){
         return body[i];
+    }
+
+    public String toString(){
+        String str = "[";
+        for(int i = 0; i < body.length - 1; i++){
+            str += body[i] + ", ";
+        }
+        if(body.length > 0) str += body[body.length - 1];
+        str += "]";
+        return str;
     }
 }

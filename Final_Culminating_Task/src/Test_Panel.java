@@ -59,6 +59,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
             repaint();
 
             double rot_speed = 0.1;
+            double zoom = 1.1;
+
+            if(pressed_keys['l']){
+                cube.scale(zoom);
+            }
+            if(pressed_keys['h']){
+                cube.scale(1/zoom);
+            }
 
             if(pressed_keys['w']){
                 camera.rotate(camera.x_norm, -rot_speed);

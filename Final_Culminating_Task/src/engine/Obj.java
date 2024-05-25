@@ -157,4 +157,15 @@ public class Obj {
         }).dot(T_model);
     }
 
+    public static void main(String[] args){
+        Obj t = new Obj("3D Object Test");
+        for(int i = 0; i < t.f.length; i++){
+            System.out.printf("%s\n%s\n%s\n\n", t.v[t.f[i][0] - 1], t.v[t.f[i][1] - 1], t.v[t.f[i][2] - 1]);
+        }
+
+        for(int i = 0; i < t.f.length; i++){
+            System.out.printf("[%.2f, %.2f, %.2f]\n", t.material.get_Kd(t.mtl[i])[0], t.material.get_Kd(t.mtl[i])[1], t.material.get_Kd(t.mtl[i])[2]);
+
+        }
+    }
 }

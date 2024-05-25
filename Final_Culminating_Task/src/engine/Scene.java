@@ -9,7 +9,7 @@ import algebra.*;
 public class Scene {
 
     private static class Consts {
-        public static double distance = 2000; // in pixel
+        public static double distance = 1000; // in pixel
         // taken the midpoint in the range of recommended eye-screen distance
         public static double view_distance = 10000; // in inch, about 0.25 km
 
@@ -34,7 +34,7 @@ public class Scene {
     }
 
     private static class Algorithm {
-        private static final double epsilon = Consts.epsilon;
+       private static final double epsilon = Consts.epsilon;
 
         private static double[] barycentric(double x, double y, double[][] triangle){
             // barycentric coordinate
@@ -54,10 +54,13 @@ public class Scene {
             // inside &= edgeFunction(V0, V1, p);
             // inside &= edgeFunction(V1, V2, p);
             // inside &= edgeFunction(V2, V0, p);
-            inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
-            inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
-            inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
-            return inside;
+            // inside &= edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
+            // inside &= edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
+            // inside &= edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+            boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
+            boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
+            boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+            return a == b && b == c;
         }
 
         public static double z_buff(double x, double y, double[][] triangle){
@@ -67,7 +70,7 @@ public class Scene {
             double[] weight = barycentric(x, y, triangle);
             double z = weight[0] / triangle[2][2] + weight[1] / triangle[0][2] + weight[2] / triangle[1][2];
             if(Math.abs(z) < epsilon)
-                return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));;
+                return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
             return 1 / z;
         }
 
@@ -143,6 +146,8 @@ public class Scene {
     public BufferedImage render(){
         BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
 
+        flush();
+
         for(Obj obj : obj_list){
             Algorithm.rasterize(cameras[view_idx], obj, screen);
         }
@@ -154,5 +159,9 @@ public class Scene {
         }
 
         return canvas;
+    }
+
+    public void flush(){
+        this.screen = new Screen(800, 450);
     }
 }
