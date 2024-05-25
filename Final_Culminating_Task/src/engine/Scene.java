@@ -52,7 +52,7 @@ public class Scene {
             boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
             boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
             boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
-            return a == b && b == c;
+            return !((a ^ b) | (b ^ c));
         }
 
         public static double z_buff(double x, double y, double[][] triangle){
