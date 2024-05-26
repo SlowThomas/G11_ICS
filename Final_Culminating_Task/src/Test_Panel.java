@@ -14,18 +14,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     Obj plane = new Obj("Starship");
     Camera camera = new Camera(0, 10, -100);
     Camera camera2 = new Camera(0, 0, 0);
+    Robot automation;
+    JFrame frame;
+    Cursor blankCursor;
 
     Scene scene = new Scene(new Camera[]{camera, camera2}, new Obj[]{cube, plane});
 
-    private final boolean[] pressed_keys = new boolean['z' + 1];
 
-    // Input Handling
-    public void keyPressed(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true; }
-    public void keyReleased(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false; }
-    public void keyTyped(KeyEvent e) {}
-
-
-    public Test_Panel(){
+    public Test_Panel(JFrame frame){
         setPreferredSize(new Dimension(800, 450));
         // Add KeyListener
         this.setFocusable(true);
@@ -36,6 +32,19 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         Thread thread = new Thread(this);
         thread.start();
 
+        try{
+            automation = new Robot();
+        }
+        catch(Exception e){}
+        this.frame = frame;
+
+
+        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+                cursorImg, new Point(0, 0), "blank cursor");
+
+        frame.getContentPane().setCursor(blankCursor);
+
         plane.scale(0.1);
         plane.auto_origin();
     }
@@ -45,12 +54,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         g.drawImage(scene.render(), 0, 0, null);
         g.setColor(new Color(255));
-        g.drawString((int)camera.pos.at(0) + ", " + (int)camera.pos.at(1) + ", " + (int)camera.pos.at(2), 100, 100);
+        g.drawString((int)camera2.pos.at(0) / 100 + ", " + (int)camera2.pos.at(1) / 100 + ", " + (int)camera2.pos.at(2) / 100, 100, 100);
     }
 
     public static void main(String[] args){
         JFrame frame = new JFrame("Test Window");
-        Test_Panel panel = new Test_Panel();
+        Test_Panel panel = new Test_Panel(frame);
         frame.add(panel);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -67,6 +76,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public void rotate(Vector axis, double angle){
         plane.rotate(axis, angle);
+        camera.rotate(plane.pos, axis, angle);
         camera2.rotate(axis, angle);
     }
 
@@ -85,9 +95,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             repaint();
 
-            double rot_speed = 0.02;
+            double rot_speed = 0.03;
             double zoom = 1.1;
-            double acc = 0.01;
+            double acc = 0.05;
 
             x_norm = camera2.x_norm;
             y_norm = camera2.y_norm;
@@ -132,28 +142,42 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     }
 
-    public double sensitivity = 0.005;
-    public int last_x = -1;
-    public int last_y = -1;
-    public int x = -1;
-    public int y = -1;
-    public boolean dragging = false;
+    public double sensitivity = 0.006;
+    public int x;
+    public int y;
+    public boolean dragging = true;
     public boolean accelerating = false;
 
-    public void mousePressed(MouseEvent e) {
-        if(e.getButton() == 3){
-            dragging = true;
+    private final boolean[] pressed_keys = new boolean['z' + 1];
+
+    // Input Handling
+    public void keyPressed(KeyEvent e) {
+        if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true;
+
+        if(e.getKeyCode() == 16){
+            dragging = false;
+            frame.getContentPane().setCursor(Cursor.getDefaultCursor());
         }
-        else if(e.getButton() == 1){
+    }
+    public void keyReleased(KeyEvent e) {
+        if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false;
+
+        if(e.getKeyCode() == 16){
+            dragging = true;
+            frame.getContentPane().setCursor(blankCursor);
+            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
+        }
+    }
+    public void keyTyped(KeyEvent e) {}
+
+    public void mousePressed(MouseEvent e) {
+        if(e.getButton() == 1){
             accelerating = true;
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if(e.getButton() == 3){
-            dragging = false;
-        }
-        else if(e.getButton() == 1){
+        if(e.getButton() == 1){
             accelerating = false;
         }
     }
@@ -165,25 +189,24 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     public void mouseDragged(MouseEvent e) {
-
-        last_x = x;
-        last_y = y;
         x = e.getX();
         y = e.getY();
+
         if(dragging) {
-            camera.rotate(plane.pos, camera.y_norm, sensitivity * (x - last_x));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - last_y));
+            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2));
+            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2));
+            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
 
     public void mouseMoved(MouseEvent e) {
-        last_x = x;
-        last_y = y;
         x = e.getX();
         y = e.getY();
+
         if(dragging) {
-            camera.rotate(plane.pos, camera.y_norm, sensitivity * (x - last_x));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - last_y));
+            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2));
+            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2));
+            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
 }
