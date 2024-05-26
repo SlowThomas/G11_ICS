@@ -12,7 +12,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     Obj cube = new Obj("3D Object Test");
     Obj plane = new Obj("Starship");
-    Camera camera = new Camera(0, 10, -100);
+    Camera camera = new Camera(0, 100, -3000);
     Camera camera2 = new Camera(0, 0, 0);
     Robot automation;
     JFrame frame;
@@ -45,7 +45,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         frame.getContentPane().setCursor(blankCursor);
 
-        plane.scale(0.1);
         plane.auto_origin();
     }
 

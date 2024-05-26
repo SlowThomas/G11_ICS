@@ -7,8 +7,9 @@ import algebra.*;
 public class Scene {
 
     private static class Consts {
-        public static double distance = 1000; // in pixel
+        public static double distance = 2145; // in pixel
         // taken the midpoint in the range of recommended eye-screen distance
+        // 800 pixels = 22 cm
         public static double view_distance = 10000; // in inch, about 0.25 km
 
         // Consts for operation
@@ -110,7 +111,7 @@ public class Scene {
                     for(int j = top; j <= bottom; j++){
                         if(point_in_triangle(i, j, vect2)){
                             z = z_buff(i, j, vect2);
-                            if(screen.z_buffed[i][j] && z >= screen.z_buffer[i][j]) continue;
+                            if(z < Consts.distance || screen.z_buffed[i][j] && z >= screen.z_buffer[i][j]) continue;
                             // TODO: Surface normal: point out or point in decides color and visibility
                             screen.colo[i][j] =
                                         (int)(color[0] * 255) * (1 << 16)
