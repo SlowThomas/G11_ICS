@@ -58,6 +58,35 @@ public class Camera {
         z_norm = new Vector(T.at(0, 2), T.at(1, 2), T.at(2, 2));
     }
 
+    public void rotate(Vector center, Vector axis, double angle){
+        if(axis.mag < Consts.epsilon) return;
+
+        // pre-compute common terms
+        double ux = axis.at(0) / axis.mag;
+        double uy = axis.at(1) / axis.mag;
+        double uz = axis.at(2) / axis.mag;
+        double x = center.at(0);
+        double y = center.at(1);
+        double z = center.at(2);
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+        double component_product = x*ux + y*uy + z*uz;
+
+        // Rotation matrix
+        // https://en.wikipedia.org/wiki/Rotation_matrix
+        Matrix T_rotate = new Matrix(new double[][]{
+                {cos + ux*ux*(1-cos),           ux*uy*(1-cos)-uz*sin,       ux*uz*(1-cos) + uy*sin,     sin*(y*uz - z*uy) - (1 - cos) * ux * component_product + x * (1 - cos)},
+                {uy*ux*(1 - cos) + uz * sin,    cos + uy*uy*(1 - cos),      uy*uz*(1 - cos) - ux*sin,   sin*(z*ux - x*uz) - (1 - cos) * uy * component_product + y * (1 - cos)},
+                {uz*ux*(1 - cos) - uy*sin,      uz*uy*(1 - cos) + ux*sin,   cos + uz*uz*(1 - cos),      sin*(x*uy - y*ux) - (1 - cos) * uz * component_product + z * (1 - cos)},
+                {0, 0, 0, 1}
+        });
+
+        T = T_rotate.dot(T);
+        T_inverse = T.inverse();
+        x_norm = new Vector(T.at(0, 0), T.at(1, 0), T.at(2, 0));
+        y_norm = new Vector(T.at(0, 1), T.at(1, 1), T.at(2, 1));
+        z_norm = new Vector(T.at(0, 2), T.at(1, 2), T.at(2, 2));
+    }
 
     public void move(Vector trail){
         Matrix Trans = new Matrix(new double[][]{

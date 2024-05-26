@@ -120,6 +120,32 @@ public class Obj {
         T_world = T_rotate.dot(T_world);
     }
 
+    public void rotate(Vector center, Vector axis, double angle){
+        if(axis.mag < Consts.epsilon) return;
+
+        // pre-compute common terms
+        double ux = axis.at(0) / axis.mag;
+        double uy = axis.at(1) / axis.mag;
+        double uz = axis.at(2) / axis.mag;
+        double x = center.at(0);
+        double y = center.at(1);
+        double z = center.at(2);
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+        double component_product = x*ux + y*uy + z*uz;
+
+        // Rotation matrix
+        // https://en.wikipedia.org/wiki/Rotation_matrix
+        Matrix T_rotate = new Matrix(new double[][]{
+                {cos + ux*ux*(1-cos),           ux*uy*(1-cos)-uz*sin,       ux*uz*(1-cos) + uy*sin,     sin*(y*uz - z*uy) - (1 - cos) * ux * component_product + x * (1 - cos)},
+                {uy*ux*(1 - cos) + uz * sin,    cos + uy*uy*(1 - cos),      uy*uz*(1 - cos) - ux*sin,   sin*(z*ux - x*uz) - (1 - cos) * uy * component_product + y * (1 - cos)},
+                {uz*ux*(1 - cos) - uy*sin,      uz*uy*(1 - cos) + ux*sin,   cos + uz*uz*(1 - cos),      sin*(x*uy - y*ux) - (1 - cos) * uz * component_product + z * (1 - cos)},
+                {0, 0, 0, 1}
+        });
+
+        T_world = T_rotate.dot(T_world);
+    }
+
     public void move(Vector trail){
         Matrix T = new Matrix(new double[][]{
                 {1, 0, 0, trail.at(0)},
