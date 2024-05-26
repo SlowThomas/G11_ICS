@@ -31,7 +31,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         Thread thread = new Thread(this);
         thread.start();
 
-        plane.cd(new Vector(0, 0, 100, 1));
+        plane.scale(0.1);
+        plane.auto_origin();
+        camera.move(0, 10, -100);
     }
 
     public void paintComponent(Graphics g){
@@ -53,6 +55,21 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
     public void keyTyped(KeyEvent e) {
     }
 
+    public Vector velocity = new Vector(0, 0, 0);
+    public Vector x_norm = camera.x_norm;
+    public Vector y_norm = camera.y_norm;
+    public Vector z_norm = camera.z_norm;
+
+    public void rotate(Vector axis, double angle){
+        plane.rotate(axis, angle);
+        camera.rotate(plane.pos, axis, angle);
+    }
+
+    public void move(){
+        plane.move(velocity);
+        camera.move(velocity);
+    }
+
     public void run() {
         while(true){
             try { Thread.sleep(20); }
@@ -60,9 +77,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
             repaint();
 
-            double rot_speed = 0.01;
+            double rot_speed = 0.02;
             double zoom = 1.1;
-            double speed = 10;
+            double acc = 0.01;
+
+            x_norm = camera.x_norm;
+            y_norm = camera.y_norm;
+            z_norm = camera.z_norm;
 
             if(pressed_keys['l']){
                 cube.scale(zoom);
@@ -72,30 +93,32 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
             }
 
             if(pressed_keys['w']){
-                camera.rotate(camera.x_norm, rot_speed);
+                rotate(x_norm, rot_speed);
             }
             if(pressed_keys['s']){
-                camera.rotate(camera.x_norm, -rot_speed);
+                rotate(x_norm, -rot_speed);
             }
             if(pressed_keys['a']){
-                camera.rotate(camera.z_norm, rot_speed);
+                rotate(z_norm, rot_speed);
             }
             if(pressed_keys['d']){
-                camera.rotate(camera.z_norm, -rot_speed);
+                rotate(z_norm, -rot_speed);
             }
             if(pressed_keys['q']){
-                camera.rotate(camera.y_norm, -rot_speed);
+                rotate(y_norm, -rot_speed);
             }
             if(pressed_keys['e']){
-                camera.rotate(camera.y_norm, rot_speed);
+                rotate(y_norm, rot_speed);
             }
 
             if(pressed_keys['j']){
-                camera.move(camera.z_norm.mult(speed));
+                velocity = velocity.add(z_norm.mult(acc));
             }
             if(pressed_keys['k']){
-                camera.move(camera.z_norm.mult(-speed));
+                velocity = velocity.subtract(z_norm.mult(acc));
             }
+
+            move();
         }
     }
 }

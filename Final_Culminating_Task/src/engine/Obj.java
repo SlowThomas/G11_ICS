@@ -183,6 +183,22 @@ public class Obj {
         }).dot(T_model);
     }
 
+    public void set_origin(double x, double y, double z){
+        T_model = new Matrix(new double[][]{
+                {1, 0, 0, -x},
+                {0, 1, 0, -y},
+                {0, 0, 1, -z},
+                {0, 0, 0, 1}
+        }).dot(T_model);
+    }
+
+    public void auto_origin(){
+        Vector mean = new Vector(0, 0, 0, 0);
+        for (Vector vertex : v) mean = mean.add(T_model.dot(vertex));
+        mean = mean.mult(1/(double)v.length);
+        set_origin(mean.at(0), mean.at(1), mean.at(2));
+    }
+
     public static void main(String[] args){
         Obj t = new Obj("3D Object Test");
         for(int i = 0; i < t.f.length; i++){
