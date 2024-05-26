@@ -142,7 +142,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     }
 
-    public double sensitivity = 0.006;
+    public double sensitivity = 0.005;
     public int x;
     public int y;
     public boolean dragging = true;
