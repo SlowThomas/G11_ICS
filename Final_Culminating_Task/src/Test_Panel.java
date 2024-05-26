@@ -8,7 +8,7 @@ import java.awt.event.*;
 import algebra.Vector;
 import engine.*;
 
-public class Test_Panel extends JPanel implements Runnable, KeyListener{
+public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
     Obj cube = new Obj("3D Object Test");
     Obj plane = new Obj("Starship");
@@ -27,6 +27,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         // Add KeyListener
         this.setFocusable(true);
         addKeyListener(this);
+        addMouseListener(this);
+        addMouseMotionListener(this);
         // Add Thread
         Thread thread = new Thread(this);
         thread.start();
@@ -62,7 +64,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
     public void rotate(Vector axis, double angle){
         plane.rotate(axis, angle);
-        camera.rotate(plane.pos, axis, angle);
+        //camera.rotate(plane.pos, axis, angle);
     }
 
     public void move(){
@@ -70,12 +72,16 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
         camera.move(velocity);
     }
 
+    public int frame_counter = 0;
+
     public void run() {
         while(true){
             try { Thread.sleep(20); }
             catch(Exception e){}
 
             repaint();
+
+
 
             double rot_speed = 0.02;
             double zoom = 1.1;
@@ -120,5 +126,47 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener{
 
             move();
         }
+    }
+
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    public double sensitivity = 0.005;
+    public int last_x = -1;
+    public int last_y = -1;
+    public int x = -1;
+    public int y = -1;
+    public boolean dragging = false;
+
+    public void mousePressed(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        dragging = false;
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void mouseDragged(MouseEvent e) {
+        last_x = x;
+        last_y = y;
+        x = e.getX();
+        y = e.getY();
+        if(dragging) {
+            camera.rotate(plane.pos, y_norm, sensitivity * (x - last_x));
+            camera.rotate(plane.pos, x_norm, sensitivity * (y - last_y));
+        }
+        else {
+            dragging = true;
+        }
+    }
+
+    public void mouseMoved(MouseEvent e) {
+
     }
 }
