@@ -8,18 +8,17 @@ import engine.*;
 
 public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
-    Obj cube = new Obj("3D Object Test");
-    Obj plane = new Obj("Starship");
-    Camera camera = new Camera(0, 100, -3000);
-    Camera camera2 = new Camera(0, 0, 0);
-    Robot automation;
-    JFrame frame;
-    Cursor blankCursor;
+    public Obj cube = new Obj("3D Object Test");
+    public Obj plane = new Obj("Starship");
+    public Camera camera = new Camera(0, 100, -3000);
+    public Camera camera2 = new Camera(0, 0, 0);
+    public Robot automation;
+    public Cursor blankCursor;
 
-    Scene scene = new Scene(new Camera[]{camera, camera2}, new Obj[]{cube, plane});
+    public Scene scene = new Scene(new Camera[]{camera, camera2}, new Obj[]{cube, plane});
 
 
-    public Test_Panel(JFrame frame){
+    public Test_Panel(){
         setPreferredSize(new Dimension(800, 450));
         // Add KeyListener
         this.setFocusable(true);
@@ -34,14 +33,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             automation = new Robot();
         }
         catch(Exception e){}
-        this.frame = frame;
 
 
         BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
                 cursorImg, new Point(0, 0), "blank cursor");
 
-        frame.getContentPane().setCursor(blankCursor);
+        this.setCursor(blankCursor);
 
         plane.auto_origin();
     }
@@ -56,7 +54,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public static void main(String[] args){
         JFrame frame = new JFrame("Test Window");
-        Test_Panel panel = new Test_Panel(frame);
+        Test_Panel panel = new Test_Panel();
         frame.add(panel);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -153,14 +151,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         if(e.getKeyCode() == 16){
             dragging = false;
-            frame.getContentPane().setCursor(Cursor.getDefaultCursor());
+            this.setCursor(Cursor.getDefaultCursor());
         }
     }
     public void keyReleased(KeyEvent e) {
         if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false;
 
         if(e.getKeyCode() == 16){
-            frame.getContentPane().setCursor(blankCursor);
+            this.setCursor(blankCursor);
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
             dragging = true;
         }
