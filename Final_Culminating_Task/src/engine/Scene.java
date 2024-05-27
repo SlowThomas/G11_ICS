@@ -1,4 +1,5 @@
 package engine;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import algebra.*;
@@ -124,10 +125,40 @@ public class Scene {
                 }
             }
         }
+
+        public static void scale(Camera camera, Flat_Obj obj, Screen screen){
+            double z = obj.pos.at(2);
+
+            int width = (int)(obj.img.getWidth() * Consts.distance / z);
+            int height = (int)(obj.img.getHeight() * Consts.distance / z);
+
+            double x = screen.width / 2.0 + obj.pos.at(0) * Consts.distance / z;
+            double y = screen.height / 2.0 - obj.pos.at(1) * Consts.distance / z;
+
+            int l = (int)x - width / 2;
+            int r = (int)x + width / 2 - (width + 1) % 2;
+            int t = (int)y - height / 2;
+            int b = (int)y + height / 2 - (height + 1) % 2;
+
+            if(r < 0 || l > screen.width || b < 0 || t > screen.height) return;
+
+            BufferedImage img = (BufferedImage) obj.img.getScaledInstance(width, height, Image.SCALE_FAST);
+
+            for(int i = l; i <= r; i++){
+                for(int j = t; j <= b; j++){
+                    if(i < 0 || j < 0 || i >= screen.width || j >= screen.height ||
+                            z < Consts.distance || screen.z_buffed[i][j] && z > screen.z_buffer[i][j]) continue;
+                    screen.colo[i][j] = img.getRGB(i - l, j - t);
+                    screen.z_buffed[i][j] = true;
+                    screen.z_buffer[i][j] = z;
+                }
+            }
+        }
     }
 
 
     private Obj[] obj_list;
+    private Flat_Obj[] flat_objs;
     private Camera[] cameras;
     public int view_idx = 0;
 
@@ -138,12 +169,22 @@ public class Scene {
         this.cameras = cameras;
     }
 
+    public Scene(Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
+        this.obj_list = obj_list;
+        this.flat_objs = flat_objs;
+        this.cameras = cameras;
+    }
+
     public BufferedImage render(){
         flush();
         BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
 
         for(Obj obj : obj_list){
             Algorithm.rasterize(cameras[view_idx], obj, screen);
+        }
+
+        for(Flat_Obj obj : flat_objs){
+            Algorithm.scale(cameras[view_idx], obj, screen);
         }
 
         for(int x = 0; x < canvas.getWidth(); x++){

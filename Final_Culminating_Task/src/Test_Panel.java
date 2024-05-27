@@ -1,8 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import javax.imageio.ImageIO;
 import java.awt.event.*;
 
 import algebra.Vector;
@@ -132,13 +130,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             if(accelerating){
                 velocity = velocity.add(z_norm.mult(acc));
             }
+            if(decelerating){
+                velocity = velocity.subtract(z_norm.mult(acc));
+            }
 
             move();
         }
-    }
-
-    public void mouseClicked(MouseEvent e) {
-
     }
 
     public double sensitivity = 0.005;
@@ -146,6 +143,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public int y;
     public boolean dragging = true;
     public boolean accelerating = false;
+    public boolean decelerating = false;
 
     private final boolean[] pressed_keys = new boolean['z' + 1];
 
@@ -167,11 +165,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
-    public void keyTyped(KeyEvent e) {}
 
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == 1){
             accelerating = true;
+        }
+        if(e.getButton() == 3){
+            decelerating = true;
         }
     }
 
@@ -179,12 +179,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         if(e.getButton() == 1){
             accelerating = false;
         }
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
+        if(e.getButton() == 3){
+            decelerating = false;
+        }
     }
 
     public void mouseDragged(MouseEvent e) {
@@ -192,8 +189,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         y = e.getY();
 
         if(dragging) {
-            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2));
+            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
+            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
@@ -203,9 +200,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         y = e.getY();
 
         if(dragging) {
-            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2));
+            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
+            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
+
+    public void keyTyped(KeyEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {}
 }
