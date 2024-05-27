@@ -8,9 +8,9 @@ import algebra.*;
 public class Scene {
 
     private static class Consts {
-        public static double distance = 2145; // in pixel
+        public static double distance = 590; // in mm
         // taken the midpoint in the range of recommended eye-screen distance
-        // 800 pixels = 22 cm
+        // 800 pixels = 220 mm
         public static double view_distance = 10000; // in inch, about 0.25 km
 
         // Consts for operation
@@ -27,11 +27,11 @@ public class Scene {
         public int height;
 
         public Screen(int width, int height){
-            colo = new int[width][height];
-            z_buffer = new double[width][height];
-            z_buffed = new boolean[width][height];
             this.width = width;
             this.height = height;
+            colo = new int[this.width][this.height];
+            z_buffer = new double[this.width][this.height];
+            z_buffed = new boolean[this.width][this.height];
         }
     }
 
@@ -68,7 +68,7 @@ public class Scene {
             return 1 / z;
         }
 
-        private static double[][] getProjected(Camera camera, Obj obj, Screen screen, int[] vertex_idx) {
+        private static double[][] getProjected(Camera camera, Obj obj, Screen screen, double pixel_per_mm, int[] vertex_idx) {
             Vector v0 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[0] - 1])));
             Vector v1 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[1] - 1])));
             Vector v2 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[2] - 1])));
@@ -79,26 +79,26 @@ public class Scene {
 
             return new double[][]{
                     {
-                            (double)screen.width / 2 + Consts.distance * v0.at(0) / z0,
-                            (double)screen.height / 2 - Consts.distance * v0.at(1) / z0,
+                            (double)screen.width / 2 + Consts.distance * v0.at(0) / z0 * pixel_per_mm,
+                            (double)screen.height / 2 - Consts.distance * v0.at(1) / z0 * pixel_per_mm,
                             z0
                     },
                     {
-                            (double)screen.width / 2 + Consts.distance * v1.at(0) / z1,
-                            (double)screen.height / 2 - Consts.distance * v1.at(1) / z1,
+                            (double)screen.width / 2 + Consts.distance * v1.at(0) / z1 * pixel_per_mm,
+                            (double)screen.height / 2 - Consts.distance * v1.at(1) / z1 * pixel_per_mm,
                             z1
                     },
                     {
-                            (double)screen.width / 2 + Consts.distance * v2.at(0) / z2,
-                            (double)screen.height / 2 - Consts.distance * v2.at(1) / z2,
+                            (double)screen.width / 2 + Consts.distance * v2.at(0) / z2 * pixel_per_mm,
+                            (double)screen.height / 2 - Consts.distance * v2.at(1) / z2 * pixel_per_mm,
                             z2
                     }
             };
         }
 
-        public static void rasterize(Camera camera, Obj obj, Screen screen){
+        public static void rasterize(Camera camera, Obj obj, Screen screen, double resolution){
             for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
-                double[][] vect2 = getProjected(camera, obj, screen, obj.f[f_idx]);
+                double[][] vect2 = getProjected(camera, obj, screen, resolution, obj.f[f_idx]);
 
                 int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
                 int right = Math.min(Math.max((int)Math.max(Math.max(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
@@ -107,6 +107,7 @@ public class Scene {
 
                 double[] color = obj.material.get_Kd(obj.mtl[f_idx]);
 
+                // TODO: multi-thread - partition left to right
                 double z;
                 for(int i = left; i <= right; i++){
                     for(int j = top; j <= bottom; j++){
@@ -167,39 +168,43 @@ public class Scene {
 
     private Screen screen;
 
-    public Scene(Camera[] cameras, Obj[] obj_list){
-        this.obj_list = obj_list;
-        this.cameras = cameras;
-    }
+    private int width;
+    private int height;
+    private double resolution;
+    public BufferedImage canvas;
 
-    public Scene(Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
+    public Scene(int width, int height, double resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
         this.obj_list = obj_list;
         this.flat_objs = flat_objs;
         this.cameras = cameras;
+        this.width = width;
+        this.height = height;
+        this.resolution = resolution; // resolution in pixel per mm
+
+        canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        // 800 pixels = 220 mm
+        screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
     }
 
-    public BufferedImage render(){
-        flush();
-        BufferedImage canvas = new BufferedImage(screen.width, screen.height, BufferedImage.TYPE_INT_RGB);
-
+    public void render(){
         for(Obj obj : obj_list){
-            Algorithm.rasterize(cameras[view_idx], obj, screen);
+            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
         }
 
         for(Flat_Obj obj : flat_objs){
             Algorithm.scale(cameras[view_idx], obj, screen);
         }
 
-        for(int x = 0; x < canvas.getWidth(); x++){
-            for(int y = 0; y < canvas.getHeight(); y++){
-                canvas.setRGB(x, y, screen.colo[x][y]);
+        for(int x = 0; x < width; x++){
+            for(int y = 0; y < height; y++){
+                canvas.setRGB(x, y, screen.colo[x * screen.width / width][y * screen.height / height]);
             }
         }
 
-        return canvas;
+        flush();
     }
 
     public void flush(){
-        screen = new Screen(800, 450);
+        screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
     }
 }

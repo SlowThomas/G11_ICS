@@ -2,6 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
+import java.sql.Time;
 
 import algebra.Vector;
 import engine.*;
@@ -28,7 +29,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         // NOTE: to be repeated before game starts
         calc = new Calc();
-        scene = new Scene(calc.cameras, calc.objs, calc.flat_objs);
+        scene = new Scene(800, 450, 10, calc.cameras, calc.objs, calc.flat_objs);
+
         Thread calculation = new Thread(calc);
         calculation.start();
         // -----------------------------------------
@@ -50,9 +52,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
-        g.drawImage(scene.render(), 0, 0, null);
+        scene.render();
+
+        g.drawImage(scene.canvas, 0, 0, null);
         g.setColor(new Color(255));
-        g.drawString((int)calc.camera2.pos.at(0) / 100 + ", " + (int)calc.camera2.pos.at(1) / 100 + ", " + (int)calc.camera2.pos.at(2) / 100, 100, 100);
+        if(t > 1E-14)
+            g.drawString((int)(1/t) + " FPS\n" + (int)(1 / calc.t) + " Hz", 100, 100);
+        // g.drawString((int)calc.camera2.pos.at(0) / 100 + ", " + (int)calc.camera2.pos.at(1) / 100 + ", " + (int)calc.camera2.pos.at(2) / 100, 100, 100);
     }
 
     public static void main(String[] args){
@@ -67,13 +73,18 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     public int frame_counter = 0;
-
+    public double t = 1;
+    public long start;
+    public long end;
     public void run() {
         while(true){
-            /*try { Thread.sleep(20); }
-            catch(Exception e){}*/
+            start = System.nanoTime();
+            try { Thread.sleep(20); }
+            catch(Exception e){}
 
             repaint();
+            end = System.nanoTime();
+            t = (end - start) * 1e-9;
         }
     }
 

@@ -42,7 +42,7 @@ public class Calc implements Runnable {
     }
 
     public int frame_counter = 0;
-    public double sensitivity = 0.005;
+    public double sensitivity = 0.001;
 
     public double mouse_dx;
     public double mouse_dy;
@@ -51,10 +51,14 @@ public class Calc implements Runnable {
     public boolean decelerating;
     public boolean[] pressed_keys = new boolean['z' + 1];
 
+    public double t;
+
     public void run() {
         while(true){
-            try { Thread.sleep(20); }
+            try { Thread.sleep(10); }
             catch(Exception e){}
+
+            long start = System.nanoTime();
 
 
             double rot_speed = 0.03;
@@ -104,6 +108,9 @@ public class Calc implements Runnable {
             }
 
             move();
+
+            long end = System.nanoTime();
+            t = (end - start) / 1e9;
         }
     }
 }
