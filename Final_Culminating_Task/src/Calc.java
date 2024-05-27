@@ -1,37 +1,26 @@
 import algebra.Vector;
 import engine.Camera;
+import engine.Flat_Obj;
 import engine.Obj;
-import engine.Scene;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
+public class Calc implements Runnable {
 
-public class Calc{// implements Runnable, MouseListener, KeyListener, MouseMotionListener {
-    /*
     public Obj cube = new Obj("3D Object Test");
     public Obj plane = new Obj("Starship");
     public Camera camera = new Camera(0, 100, -3000);
     public Camera camera2 = new Camera(0, 0, 0);
-    public Robot automation;
 
-    //public Scene scene = new Scene(new Camera[]{camera, camera2}, new Obj[]{cube, plane});
+    // mounting points
+    public Camera[] cameras;
+    public Obj[] objs;
+    public Flat_Obj[] flat_objs;
 
     public Calc(){
         plane.auto_origin();
 
-        try{
-            automation = new Robot();
-        }
-        catch(Exception e){}
-        this.pane = frame;
-
-
-        BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-                cursorImg, new Point(0, 0), "blank cursor");
-
-        frame.getContentPane().setCursor(blankCursor);
+        cameras = new Camera[]{camera, camera2};
+        objs = new Obj[]{cube, plane};
+        flat_objs = new Flat_Obj[]{};
     }
 
 
@@ -53,13 +42,20 @@ public class Calc{// implements Runnable, MouseListener, KeyListener, MouseMotio
     }
 
     public int frame_counter = 0;
+    public double sensitivity = 0.005;
+
+    public double mouse_dx;
+    public double mouse_dy;
+    public boolean dragging;
+    public boolean accelerating;
+    public boolean decelerating;
+    public boolean[] pressed_keys = new boolean['z' + 1];
 
     public void run() {
         while(true){
             try { Thread.sleep(20); }
             catch(Exception e){}
 
-            repaint();
 
             double rot_speed = 0.03;
             double zoom = 1.1;
@@ -102,81 +98,12 @@ public class Calc{// implements Runnable, MouseListener, KeyListener, MouseMotio
             if(decelerating){
                 velocity = velocity.subtract(z_norm.mult(acc));
             }
+            if(dragging){
+                camera.rotate(plane.pos, camera2.y_norm, sensitivity * mouse_dx);
+                camera.rotate(plane.pos, camera.x_norm, sensitivity * mouse_dy);
+            }
 
             move();
         }
     }
-
-    public double sensitivity = 0.005;
-    public int x;
-    public int y;
-    public boolean dragging = true;
-    public boolean accelerating = false;
-    public boolean decelerating = false;
-
-    private final boolean[] pressed_keys = new boolean['z' + 1];
-
-    // Input Handling
-    public void keyPressed(KeyEvent e) {
-        if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true;
-
-        if(e.getKeyCode() == 16){
-            dragging = false;
-            frame.getContentPane().setCursor(Cursor.getDefaultCursor());
-        }
-    }
-    public void keyReleased(KeyEvent e) {
-        if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false;
-
-        if(e.getKeyCode() == 16){
-            frame.getContentPane().setCursor(blankCursor);
-            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
-            dragging = true;
-        }
-    }
-
-    public void mousePressed(MouseEvent e) {
-        if(e.getButton() == 1){
-            accelerating = true;
-        }
-        if(e.getButton() == 3){
-            decelerating = true;
-        }
-    }
-
-    public void mouseReleased(MouseEvent e) {
-        if(e.getButton() == 1){
-            accelerating = false;
-        }
-        if(e.getButton() == 3){
-            decelerating = false;
-        }
-    }
-
-    public void mouseDragged(MouseEvent e) {
-        if(dragging) {
-            x = e.getX();
-            y = e.getY();
-            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
-            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
-        }
-    }
-
-    public void mouseMoved(MouseEvent e) {
-        if(dragging) {
-            x = e.getX();
-            y = e.getY();
-            camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
-            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
-        }
-    }
-
-    public void keyTyped(KeyEvent e) {}
-    public void mouseEntered(MouseEvent e) {}
-    public void mouseExited(MouseEvent e) {}
-    public void mouseClicked(MouseEvent e) {}
-
-     */
 }
