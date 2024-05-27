@@ -94,7 +94,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             double rot_speed = 0.03;
             double zoom = 1.1;
-            double acc = 0.05;
+            double acc = 0.1;
 
             x_norm = camera2.x_norm;
             y_norm = camera2.y_norm;
@@ -160,9 +160,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = false;
 
         if(e.getKeyCode() == 16){
-            dragging = true;
             frame.getContentPane().setCursor(blankCursor);
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
+            dragging = true;
         }
     }
 
@@ -185,10 +185,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     public void mouseDragged(MouseEvent e) {
-        x = e.getX();
-        y = e.getY();
-
         if(dragging) {
+            x = e.getX();
+            y = e.getY();
             camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
             camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
@@ -196,10 +195,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     public void mouseMoved(MouseEvent e) {
-        x = e.getX();
-        y = e.getY();
-
         if(dragging) {
+            x = e.getX();
+            y = e.getY();
             camera.rotate(plane.pos, camera2.y_norm, sensitivity * (x - getWidth() / 2.0));
             camera.rotate(plane.pos, camera.x_norm, sensitivity * (y - getHeight() / 2.0));
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);

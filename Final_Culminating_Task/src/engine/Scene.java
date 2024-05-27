@@ -160,9 +160,9 @@ public class Scene {
     }
 
 
-    private Obj[] obj_list;
-    private Flat_Obj[] flat_objs;
-    private Camera[] cameras;
+    private Obj[] obj_list = new Obj[0];
+    private Flat_Obj[] flat_objs = new Flat_Obj[0];
+    private Camera[] cameras = new Camera[0];
     public int view_idx = 0;
 
     private Screen screen;
