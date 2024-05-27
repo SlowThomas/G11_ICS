@@ -205,6 +205,11 @@ public class Scene {
     }
 
     public void flush(){
-        screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
+        for(int i = 0; i < screen.width; i++)
+            for(int j = 0; j < screen.height; j++)
+                screen.colo[i][j] = 0;
+        for(int i = 0; i < screen.width; i++)
+            for(int j = 0; j < screen.height; j++)
+                screen.z_buffed[i][j] = false;
     }
 }
