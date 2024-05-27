@@ -46,7 +46,7 @@ public class Calc implements Runnable {
 
     public double mouse_dx;
     public double mouse_dy;
-    public boolean dragging;
+    public boolean dragging = true;
     public boolean accelerating;
     public boolean decelerating;
     public boolean[] pressed_keys = new boolean['z' + 1];
@@ -55,10 +55,10 @@ public class Calc implements Runnable {
 
     public void run() {
         while(true){
-            try { Thread.sleep(10); }
-            catch(Exception e){}
-
             long start = System.nanoTime();
+
+            try { Thread.sleep(20); }
+            catch(Exception e){}
 
 
             double rot_speed = 0.03;
