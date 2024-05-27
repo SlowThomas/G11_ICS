@@ -18,21 +18,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public Test_Panel(){
         setPreferredSize(new Dimension(800, 450));
-        // Add KeyListener
-        this.setFocusable(true);
-        addKeyListener(this);
-        addMouseListener(this);
-        addMouseMotionListener(this);
-        // Add Graphics Thread
-        Thread thread = new Thread(this);
-        thread.start();
 
         // NOTE: to be repeated before game starts
         calc = new Calc();
         scene = new Scene(800, 450, 10, calc.cameras, calc.objs, calc.flat_objs);
 
         Thread calculation = new Thread(calc);
-        calculation.start();
+        //calculation.start();
         // -----------------------------------------
 
 
@@ -47,17 +39,27 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 cursorImg, new Point(0, 0), "blank cursor");
 
         this.setCursor(blankCursor);
+
+
+        // Add KeyListener
+        this.setFocusable(true);
+        addKeyListener(this);
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        // Add Graphics Thread
+        Thread thread = new Thread(this);
+        thread.start();
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
+        calc.epoch();
         scene.render();
-
         g.drawImage(scene.canvas, 0, 0, null);
         g.setColor(new Color(255));
         if(t > 1E-14)
-            g.drawString((int)(1/t) + " FPS\n" + (int)(1 / calc.t) + " Hz", 100, 100);
+            g.drawString((int)(1/t) + " FPS " + calc.t + " ms", 100, 100);
         // g.drawString((int)calc.camera2.pos.at(0) / 100 + ", " + (int)calc.camera2.pos.at(1) / 100 + ", " + (int)calc.camera2.pos.at(2) / 100, 100, 100);
     }
 
@@ -78,13 +80,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public long end;
     public void run() {
         while(true){
-            start = System.nanoTime();
+            start = System.currentTimeMillis();
             try { Thread.sleep(20); }
             catch(Exception e){}
 
             repaint();
-            end = System.nanoTime();
-            t = (end - start) * 1e-9;
+
+            end = System.currentTimeMillis();
+            t = (end - start) / 1000.0;
         }
     }
 

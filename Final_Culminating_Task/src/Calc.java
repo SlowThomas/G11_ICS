@@ -53,64 +53,69 @@ public class Calc implements Runnable {
 
     public double t;
 
+    public void epoch(){
+        long start = System.currentTimeMillis();
+
+        double rot_speed = 0.03;
+        double zoom = 1.1;
+        double acc = 0.1;
+
+        x_norm = camera2.x_norm;
+        y_norm = camera2.y_norm;
+        z_norm = camera2.z_norm;
+
+        if(pressed_keys['l']){
+            cube.scale(zoom);
+
+        }
+        if(pressed_keys['h']){
+            cube.scale(1/zoom);
+        }
+
+        if(pressed_keys['w']){
+            rotate(x_norm, rot_speed);
+        }
+        if(pressed_keys['s']){
+            rotate(x_norm, -rot_speed);
+        }
+        if(pressed_keys['a']){
+            rotate(z_norm, rot_speed);
+        }
+        if(pressed_keys['d']){
+            rotate(z_norm, -rot_speed);
+        }
+        if(pressed_keys['q']){
+            rotate(y_norm, -rot_speed);
+        }
+        if(pressed_keys['e']){
+            rotate(y_norm, rot_speed);
+        }
+
+        if(accelerating){
+            velocity = velocity.add(z_norm.mult(acc));
+        }
+        if(decelerating){
+            velocity = velocity.subtract(z_norm.mult(acc));
+        }
+        if(dragging){
+            camera.rotate(plane.pos, camera2.y_norm, sensitivity * mouse_dx);
+            camera.rotate(plane.pos, camera.x_norm, sensitivity * mouse_dy);
+        }
+
+        move();
+
+        long end = System.currentTimeMillis();
+        t = (end - start);
+    }
+
     public void run() {
         while(true){
-            long start = System.nanoTime();
+            long start = System.currentTimeMillis();
 
             try { Thread.sleep(20); }
             catch(Exception e){}
 
-
-            double rot_speed = 0.03;
-            double zoom = 1.1;
-            double acc = 0.1;
-
-            x_norm = camera2.x_norm;
-            y_norm = camera2.y_norm;
-            z_norm = camera2.z_norm;
-
-            if(pressed_keys['l']){
-                cube.scale(zoom);
-
-            }
-            if(pressed_keys['h']){
-                cube.scale(1/zoom);
-            }
-
-            if(pressed_keys['w']){
-                rotate(x_norm, rot_speed);
-            }
-            if(pressed_keys['s']){
-                rotate(x_norm, -rot_speed);
-            }
-            if(pressed_keys['a']){
-                rotate(z_norm, rot_speed);
-            }
-            if(pressed_keys['d']){
-                rotate(z_norm, -rot_speed);
-            }
-            if(pressed_keys['q']){
-                rotate(y_norm, -rot_speed);
-            }
-            if(pressed_keys['e']){
-                rotate(y_norm, rot_speed);
-            }
-
-            if(accelerating){
-                velocity = velocity.add(z_norm.mult(acc));
-            }
-            if(decelerating){
-                velocity = velocity.subtract(z_norm.mult(acc));
-            }
-            if(dragging){
-                camera.rotate(plane.pos, camera2.y_norm, sensitivity * mouse_dx);
-                camera.rotate(plane.pos, camera.x_norm, sensitivity * mouse_dy);
-            }
-
-            move();
-
-            long end = System.nanoTime();
-            t = (end - start) / 1e9;
+            epoch();
         }
     }
 }
