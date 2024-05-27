@@ -1,7 +1,6 @@
 package engine;
 import algebra.*;
 
-import java.io.IOException;
 import java.util.Scanner;
 import java.io.File;
 
