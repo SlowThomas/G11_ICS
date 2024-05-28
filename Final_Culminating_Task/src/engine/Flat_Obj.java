@@ -9,7 +9,7 @@ import java.io.File;
 public class Flat_Obj {
 
     public BufferedImage img;
-    public double scale = 1;
+    public float scale = 1;
 
     public Vector pos = new Vector(0, 0, 0, 1);
 
@@ -23,7 +23,7 @@ public class Flat_Obj {
     }
 
     public void move(Vector trail){
-        pos = new Matrix(new double[][]{
+        pos = new Matrix(new float[][]{
                 {1, 0, 0, trail.at(0)},
                 {0, 1, 0, trail.at(1)},
                 {0, 0, 1, trail.at(2)},
@@ -31,8 +31,8 @@ public class Flat_Obj {
         }).dot(pos);
     }
 
-    public void move(double x, double y, double z){
-        pos = new Matrix(new double[][]{
+    public void move(float x, float y, float z){
+        pos = new Matrix(new float[][]{
                 {1, 0, 0, x},
                 {0, 1, 0, y},
                 {0, 0, 1, z},
@@ -44,7 +44,7 @@ public class Flat_Obj {
         move(destination.subtract(pos));
     }
 
-    public void scale(double scale){
+    public void scale(float scale){
         this.scale *= scale;
     }
 }

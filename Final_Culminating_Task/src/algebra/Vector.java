@@ -2,26 +2,26 @@ package algebra;
 
 public class Vector extends Object{
     public int shape;
-    public double mag;
-    protected double[] body;
+    public float mag;
+    public float[] body;
 
-    public Vector(double... body){
+    public Vector(float... body){
         this.shape = body.length;
         this.body = body;
         /*
-        this.body = new double[body.length];
+        this.body = new float[body.length];
         for(int i = 0; i < body.length; this.body[i] = body[i++]);
          */
         for(int i = 0; i < this.shape; this.mag += body[i] * body[i++]);
-        this.mag = Math.sqrt(this.mag);
+        this.mag = (float) Math.sqrt(this.mag);
     }
 
-    public double dot(Vector nxt) throws ArithmeticException{
+    public float dot(Vector nxt) throws ArithmeticException{
         if(this.shape != nxt.shape)
             throw new ArithmeticException(
                     "Performing dot product between a " + this.shape + "-d Vector and a " + nxt.shape + "-d Vector"
             );
-        double result = 0;
+        float result = 0;
         for(int i = 0; i < this.shape; i++)
             result += this.body[i] * nxt.body[i];
         return result;
@@ -49,7 +49,7 @@ public class Vector extends Object{
             throw new ArithmeticException(
                     "Performing element-wise operation between a " + this.shape + "-d Vector and a " + nxt.shape + "-d Vector"
             );
-        double[] v = new double[shape];
+        float[] v = new float[shape];
         for(int i = 0; i < shape; i++)
             v[i] = body[i] + nxt.body[i];
         return new Vector(v);
@@ -60,20 +60,20 @@ public class Vector extends Object{
             throw new ArithmeticException(
                     "Performing element-wise operation between a " + this.shape + "-d Vector and a " + nxt.shape + "-d Vector"
             );
-        double[] v = new double[shape];
+        float[] v = new float[shape];
         for(int i = 0; i < shape; i++)
             v[i] = body[i] - nxt.body[i];
         return new Vector(v);
     }
 
-    public Vector mult(double n){
-        double[] v = new double[shape];
+    public Vector mult(float n){
+        float[] v = new float[shape];
         for(int i = 0; i < shape; i++)
             v[i] = n * body[i];
         return new Vector(v);
     }
 
-    public double at(int i){
+    public float at(int i){
         return body[i];
     }
 

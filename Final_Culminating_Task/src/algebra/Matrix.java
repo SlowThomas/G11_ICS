@@ -1,15 +1,15 @@
 package algebra;
 
 public class Matrix {
-    private double epsilon = 1E-10; // another choice: 1E-14
+    private float epsilon = 1E-10F; // another choice: 1E-14
     public int[] shape = new int[2];
-    protected double[][] body;
-    public Matrix(double[][] body){
+    public float[][] body;
+    public Matrix(float[][] body){
         this.shape[0] = body.length;
         if(body.length > 0)
             this.shape[1] = body[0].length;
         /*
-        this.body = new double[this.shape[0]][this.shape[1]];
+        this.body = new float[this.shape[0]][this.shape[1]];
         for(int i = 0; i < this.shape[0]; i++)
             for(int j = 0; j < this.shape[1]; this.body[i][j] = body[i][j++]);
          */
@@ -17,13 +17,13 @@ public class Matrix {
     }
 
     public Vector at(int col) {
-        double[] v = new double[shape[0]];
+        float[] v = new float[shape[0]];
         for (int i = 0; i < shape[0]; i++)
             v[i] = body[col][i];
         return new Vector(v);
     }
 
-    public double at(int i, int j){
+    public float at(int i, int j){
         return body[i][j];
     }
 
@@ -33,7 +33,7 @@ public class Matrix {
                     "Performing dot product between a " + this.shape[0] + "x" + this.shape[1] + " Matrix and a " + nxt.shape[0] + "x" + nxt.shape[1] + " Matrix"
             );
 
-        double[][] result = new double[this.shape[0]][nxt.shape[1]];
+        float[][] result = new float[this.shape[0]][nxt.shape[1]];
         for(int i = 0; i < this.shape[0]; i++)
             for(int j = 0; j < nxt.shape[1]; j++)
                 for(int k = 0; k < this.shape[1]; k++)
@@ -46,7 +46,7 @@ public class Matrix {
             throw new ArithmeticException(
                     "Performing dot product between a " + this.shape[0] + "x" + this.shape[1] + " Matrix and a " + nxt.shape + "-d Vector"
             );
-        double[] result = new double[this.shape[0]];
+        float[] result = new float[this.shape[0]];
         for(int i = 0; i < this.shape[0]; i++)
             for(int j = 0; j < this.shape[1]; j++)
                 result[i] += this.body[i][j] * nxt.body[j];
@@ -56,7 +56,7 @@ public class Matrix {
     // Method to compute the inverse of a 4x4 matrix
     public Matrix inverse() {
         // Compute the determinant of the matrix
-        double det = det();
+        float det = det();
 
         // Check if the matrix is invertible
         if (Math.abs(det) < epsilon) {
@@ -64,7 +64,7 @@ public class Matrix {
         }
 
         // Compute the adj of the matrix, divided by the det
-        double[][] matrix = new double[shape[0]][shape[1]];
+        float[][] matrix = new float[shape[0]][shape[1]];
         for (int i = 0; i < shape[0]; i++) {
             for (int j = 0; j < shape[1]; j++) {
                 matrix[i][j] = cofactor(j, i) / det;
@@ -74,14 +74,14 @@ public class Matrix {
     }
 
     // Method to compute the determinant
-    public double det() throws ArithmeticException{
+    public float det() throws ArithmeticException{
         if(shape[0] != shape[1]) throw new ArithmeticException("Matrix is not square");
 
         if(shape[0] == 1){
             return body[0][0];
         }
 
-        double det = 0;
+        float det = 0;
         for(int i = 0; i < shape[0]; i++){
             if(i % 2 == 0) det += body[0][i] * minor(0, i).det();
             else det -= body[0][i] * minor(0, i).det();
@@ -108,7 +108,7 @@ public class Matrix {
 
     // Method to compute the matrix's adj
     public Matrix adj() {
-        double[][] matrix = new double[shape[0]][shape[1]];
+        float[][] matrix = new float[shape[0]][shape[1]];
         for (int i = 0; i < shape[0]; i++) {
             for (int j = 0; j < shape[1]; j++) {
                 matrix[i][j] = cofactor(j, i);
@@ -118,14 +118,14 @@ public class Matrix {
     }
 
     // Method to compute the cofactor of a specific element in a matrix
-    public double cofactor(int row, int col) {
+    public float cofactor(int row, int col) {
         if((row + col) % 2 == 0) return minor(row, col).det();
         return -minor(row, col).det();
     }
 
     // Method to compute the minor of a matrix with a specific row and column removed
     public Matrix minor(int row, int col) {
-        double[][] minor = new double[shape[0] - 1][shape[1] - 1];
+        float[][] minor = new float[shape[0] - 1][shape[1] - 1];
         for(int x = 0, i = 0; x < shape[0]; x++){
             if(x == row) continue;
             for(int y = 0, j = 0; y < shape[1]; y++){

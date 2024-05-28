@@ -4,24 +4,23 @@ import java.awt.image.BufferedImage;
 
 import algebra.*;
 
+import javax.swing.*;
+
 
 public class Scene {
 
     private static class Consts {
-        public static double distance = 590; // in mm
+        public static float distance = 590; // in mm
         // taken the midpoint in the range of recommended eye-screen distance
         // 800 pixels = 220 mm
-        public static double view_distance = 10000; // in inch, about 0.25 km
 
         // Consts for operation
-        public static double epsilon = 1E-10; // another choice: 1E-14
-        private final double pi = Math.PI;
-
+        public static float epsilon = 1E-10F; // another choice: 1E-14
     }
 
     private static class Screen{
         public int[][] colo;
-        public double[][] z_buffer;
+        public float[][] z_buffer;
         public boolean[][] z_buffed;
         public int width;
         public int height;
@@ -30,95 +29,93 @@ public class Scene {
             this.width = width;
             this.height = height;
             colo = new int[this.width][this.height];
-            z_buffer = new double[this.width][this.height];
+            z_buffer = new float[this.width][this.height];
             z_buffed = new boolean[this.width][this.height];
         }
     }
 
     private static class Algorithm {
-       private static final double epsilon = Consts.epsilon;
+       private static final float epsilon = Consts.epsilon;
 
-        private static double[] barycentric(double x, double y, double[][] triangle){
-            double t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
-            double l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
-            double l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
-            double l3 = Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
-            return new double[]{l1, l2, l3};
+        private static float[] barycentric(float x, float y, float[][] triangle){
+            float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
+            float l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
+            float l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
+            float l3 = Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
+            return new float[]{l1, l2, l3};
         }
 
-        public static boolean edgeFunction(double ax, double ay, double bx, double by, double px, double py) {
+        public static boolean edgeFunction(float ax, float ay, float bx, float by, float px, float py) {
             return (px - ax) * (by - ay) - (py - ay) * (bx - ax) >= 0;
         }
 
-        public static boolean point_in_triangle(double px, double py, double[][] triangle){
+        public static boolean point_in_triangle(float px, float py, float[][] triangle){
             boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
             boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
             boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
             return !((a ^ b) | (b ^ c));
         }
 
-        public static double z_buff(double x, double y, double[][] triangle){
+        public static float z_buff(float x, float y, float[][] triangle){
             // barycentric coordinate using the inverses. z_buffer's are linear to each other in terms of their inverses
             if(Math.abs(triangle[0][2]) < epsilon || Math.abs(triangle[1][2]) < epsilon || Math.abs(triangle[2][2]) < epsilon)
                 return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
-            double[] weight = barycentric(x, y, triangle);
-            double z = weight[0] / triangle[2][2] + weight[1] / triangle[0][2] + weight[2] / triangle[1][2];
-            if(Math.abs(z) < epsilon)
-                return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
-            return 1 / z;
+            //float[] weight = barycentric(x, y, triangle);
+            float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
+
+            //float z = weight[0] / triangle[2][2] + weight[1] / triangle[0][2] + weight[2] / triangle[1][2];
+
+            //if(Math.abs(z) < epsilon)
+            //    return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
+            //return 1 / z;
+
+            return 1 / Math.max(epsilon, (Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t) / triangle[2][2]
+                    + (Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t) / triangle[0][2]
+                    + (Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t) / triangle[1][2]);
+
+
         }
 
-        private static double[][] getProjected(Camera camera, Obj obj, Screen screen, double pixel_per_mm, int[] vertex_idx) {
+        private static void getProjected(Camera camera, Obj obj, Screen screen, float pixel_per_mm, int[] vertex_idx, float[][] vect2) {
             Vector v0 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[0] - 1])));
             Vector v1 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[1] - 1])));
             Vector v2 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[2] - 1])));
 
-            double z0 = Math.max(epsilon, v0.at(2));
-            double z1 = Math.max(epsilon, v1.at(2));
-            double z2 = Math.max(epsilon, v2.at(2));
+            float z0 = Math.max(epsilon, v0.at(2));
+            float z1 = Math.max(epsilon, v1.at(2));
+            float z2 = Math.max(epsilon, v2.at(2));
 
-            return new double[][]{
-                    {
-                            (double)screen.width / 2 + Consts.distance * v0.at(0) / z0 * pixel_per_mm,
-                            (double)screen.height / 2 - Consts.distance * v0.at(1) / z0 * pixel_per_mm,
-                            z0
-                    },
-                    {
-                            (double)screen.width / 2 + Consts.distance * v1.at(0) / z1 * pixel_per_mm,
-                            (double)screen.height / 2 - Consts.distance * v1.at(1) / z1 * pixel_per_mm,
-                            z1
-                    },
-                    {
-                            (double)screen.width / 2 + Consts.distance * v2.at(0) / z2 * pixel_per_mm,
-                            (double)screen.height / 2 - Consts.distance * v2.at(1) / z2 * pixel_per_mm,
-                            z2
-                    }
-            };
+            vect2[0][0] = (float)screen.width / 2 + Consts.distance * v0.at(0) / z0 * pixel_per_mm;
+            vect2[0][1] = (float)screen.height / 2 - Consts.distance * v0.at(1) / z0 * pixel_per_mm;
+            vect2[0][2] = z0;
+            vect2[1][0] = (float)screen.width / 2 + Consts.distance * v1.at(0) / z1 * pixel_per_mm;
+            vect2[1][1] = (float)screen.height / 2 - Consts.distance * v1.at(1) / z1 * pixel_per_mm;
+            vect2[1][2] = z1;
+            vect2[2][0] = (float)screen.width / 2 + Consts.distance * v2.at(0) / z2 * pixel_per_mm;
+            vect2[2][1] = (float)screen.height / 2 - Consts.distance * v2.at(1) / z2 * pixel_per_mm;
+            vect2[2][2] = z2;
         }
 
-        public static void rasterize(Camera camera, Obj obj, Screen screen, double resolution){
-            for(int f_idx = 0; f_idx < obj.f.length; f_idx++){
-                double[][] vect2 = getProjected(camera, obj, screen, resolution, obj.f[f_idx]);
+        public static void rasterize(Camera camera, Obj obj, Screen screen, float resolution){
+            float[][] vect2 = new float[3][3];
+            for (int f_idx = 0; f_idx < obj.f.length; f_idx++) {
+                getProjected(camera, obj, screen, resolution, obj.f[f_idx], vect2);
+
+                int color = obj.material.get_Kd(obj.mtl[f_idx]);
 
                 int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
                 int right = Math.min(Math.max((int)Math.max(Math.max(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
                 int top = Math.min(Math.max((int)Math.min(Math.min(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
                 int bottom = Math.min(Math.max((int)Math.max(Math.max(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
 
-                double[] color = obj.material.get_Kd(obj.mtl[f_idx]);
-
-                // TODO: multi-thread - partition left to right
-                double z;
-                for(int i = left; i <= right; i++){
-                    for(int j = top; j <= bottom; j++){
-                        if(point_in_triangle(i, j, vect2)){
+                float z;
+                for (int i = left; i <= right; i++) {
+                    for (int j = top; j <= bottom; j++) {
+                        if (point_in_triangle(i, j, vect2)) {
                             z = z_buff(i, j, vect2);
-                            if(z < Consts.distance || screen.z_buffed[i][j] && z >= screen.z_buffer[i][j]) continue;
-                            // TODO: Surface normal: point out or point in decides color and visibility
-                            screen.colo[i][j] =
-                                        (int)(color[0] * 255) * (1 << 16)
-                                    +   (int)(color[1] * 255) * (1 << 8)
-                                    +   (int)(color[2] * 255);
+                            if (z < Consts.distance || screen.z_buffed[i][j] && z >= screen.z_buffer[i][j])
+                                continue;
+                            screen.colo[i][j] = color;
                             screen.z_buffer[i][j] = z;
                             screen.z_buffed[i][j] = true;
                         }
@@ -129,15 +126,15 @@ public class Scene {
 
         public static void scale(Camera camera, Flat_Obj obj, Screen screen){
             Vector pos = camera.T_inverse.dot(obj.pos);
-            double z = pos.at(2);
+            float z = pos.at(2);
 
             if(z < Consts.distance) return;
 
             int width = (int)(obj.img.getWidth() * Consts.distance / z);
             int height = (int)(obj.img.getHeight() * Consts.distance / z);
 
-            double x = screen.width / 2.0 + pos.at(0) * Consts.distance / z;
-            double y = screen.height / 2.0 - pos.at(1) * Consts.distance / z;
+            float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z;
+            float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z;
 
             int l = (int)x - width / 2;
             int r = (int)x + width / 2 - (width + 1) % 2;
@@ -170,10 +167,10 @@ public class Scene {
 
     private int width;
     private int height;
-    private double resolution;
+    private float resolution;
     public BufferedImage canvas;
 
-    public Scene(int width, int height, double resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
+    public Scene(int width, int height, float resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
         this.obj_list = obj_list;
         this.flat_objs = flat_objs;
         this.cameras = cameras;

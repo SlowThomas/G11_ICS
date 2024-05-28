@@ -1,3 +1,4 @@
+import algebra.Matrix;
 import algebra.Vector;
 import engine.Camera;
 import engine.Flat_Obj;
@@ -29,9 +30,10 @@ public class Calc implements Runnable {
     public Vector y_norm = camera.y_norm;
     public Vector z_norm = camera.z_norm;
 
-    public void rotate(Vector axis, double angle){
+    public void rotate(Vector axis, float angle){
         plane.rotate(axis, angle);
-        camera.rotate(plane.pos, axis, angle);
+        if(camera_mode == 0)
+            camera.rotate(plane.pos, axis, angle);
         camera2.rotate(axis, angle);
     }
 
@@ -53,12 +55,25 @@ public class Calc implements Runnable {
 
     public double t;
 
+    float rot_speed_max;
+    float rot_speed = 0;
+    float rot_acc = 0.005f;
+    float zoom = 1.1f;
+    float acc = 0.5f;
+
+    int camera_mode = 0;
+
     public void epoch(){
         long start = System.currentTimeMillis();
 
-        double rot_speed = 0.03;
-        double zoom = 1.1;
-        double acc = 0.1;
+        if(camera_mode == 0){
+            rot_speed_max = 0.01f;
+            rot_acc = 0.002f;
+        }
+        else if(camera_mode == 1){
+            rot_speed_max = 0.1f;
+            rot_acc = 0.01f;
+        }
 
         x_norm = camera2.x_norm;
         y_norm = camera2.y_norm;
@@ -74,22 +89,44 @@ public class Calc implements Runnable {
 
         if(pressed_keys['w']){
             rotate(x_norm, rot_speed);
+            rot_speed += rot_acc;
         }
         if(pressed_keys['s']){
             rotate(x_norm, -rot_speed);
+            rot_speed += rot_acc;
         }
         if(pressed_keys['a']){
             rotate(z_norm, rot_speed);
+            rot_speed += rot_acc;
         }
         if(pressed_keys['d']){
             rotate(z_norm, -rot_speed);
+            rot_speed += rot_acc;
         }
         if(pressed_keys['q']){
             rotate(y_norm, -rot_speed);
+            rot_speed += rot_acc;
         }
         if(pressed_keys['e']){
             rotate(y_norm, rot_speed);
+            rot_speed += rot_acc;
         }
+
+        if(!(pressed_keys['w'] || pressed_keys['a'] || pressed_keys['s'] || pressed_keys['d'] || pressed_keys['e'] || pressed_keys['q'])){
+            rot_speed = 0;
+        }
+
+        if(camera_mode != 0 && pressed_keys['1']){
+            camera.rotate(plane.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
+            camera.rotate(camera2.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
+            //camera.rotate(camera2.pos, camera.z_norm.cross(z_norm), (float)Math.acos(camera.z_norm.dot(z_norm)));
+            camera_mode = 0;
+        }
+        if(pressed_keys['2']){
+            camera_mode = 1;
+        }
+
+        rot_speed = Math.max(0, Math.min(rot_speed_max, rot_speed));
 
         if(accelerating){
             velocity = velocity.add(z_norm.mult(acc));
@@ -98,8 +135,14 @@ public class Calc implements Runnable {
             velocity = velocity.subtract(z_norm.mult(acc));
         }
         if(dragging){
-            camera.rotate(plane.pos, camera2.y_norm, sensitivity * mouse_dx);
-            camera.rotate(plane.pos, camera.x_norm, sensitivity * mouse_dy);
+            if(camera_mode == 0){
+                camera.rotate(plane.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
+                camera.rotate(plane.pos, camera.x_norm, (float) (sensitivity * mouse_dy));
+            }
+            else if(camera_mode == 1){
+                camera.rotate(plane.pos, camera.y_norm, (float) (sensitivity * mouse_dx));
+                camera.rotate(plane.pos, camera.x_norm, (float) (sensitivity * mouse_dy));
+            }
         }
 
         move();

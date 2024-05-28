@@ -58,8 +58,10 @@ public class Mtl {
         }
     }
 
-    public double[] get_Kd(int idx){
-        return Kd[idx];
+    public int get_Kd(int idx){
+        return (int) (Kd[idx][0] * 255) * (1 << 16)
+                + (int) (Kd[idx][1] * 255) * (1 << 8)
+                + (int) (Kd[idx][2] * 255);
     }
 
     public double[] get_Kd(String material_name){
