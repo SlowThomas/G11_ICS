@@ -1,15 +1,20 @@
-import algebra.Matrix;
 import algebra.Vector;
 import engine.Camera;
 import engine.Flat_Obj;
 import engine.Obj;
+import engine.Scene;
 
 public class Calc implements Runnable {
 
-    public Obj cube = new Obj("3D Object Test");
-    public Obj plane = new Obj("Starship");
+    public Obj cube = new Obj("Cube");
+    public Obj plane = new Obj("Arrow");
+
+    public Flat_Obj bullet = new Flat_Obj("Bullet.png");
+
     public Camera camera = new Camera(0, 100, -3000);
     public Camera camera2 = new Camera(0, 0, 0);
+
+    public Scene scene;
 
     // mounting points
     public Camera[] cameras;
@@ -19,9 +24,12 @@ public class Calc implements Runnable {
     public Calc(){
         plane.auto_origin();
 
+        bullet.scale(0.1);
+
         cameras = new Camera[]{camera, camera2};
         objs = new Obj[]{cube, plane};
-        flat_objs = new Flat_Obj[]{};
+        flat_objs = new Flat_Obj[]{bullet};
+        scene = new Scene(800, 450, 10, cameras, objs, flat_objs);
     }
 
 
@@ -44,7 +52,7 @@ public class Calc implements Runnable {
     }
 
     public int frame_counter = 0;
-    public double sensitivity = 0.001;
+    public double sensitivity = 0.01;
 
     public double mouse_dx;
     public double mouse_dy;
@@ -61,11 +69,22 @@ public class Calc implements Runnable {
     float zoom = 1.1f;
     float acc = 0.5f;
 
+    public Vector bullet_v;
+
     int camera_mode = 0;
 
-    public void epoch(){
-        long start = System.currentTimeMillis();
+    boolean shooting = false;
 
+    public void shoot(){
+        bullet.show();
+        bullet.cd(camera2.pos);
+        bullet_v = velocity.add(z_norm.mult(10));
+
+        shooting = true;
+    }
+
+    public void epoch(){
+        scene.render();
         if(camera_mode == 0){
             rot_speed_max = 0.01f;
             rot_acc = 0.002f;
@@ -111,6 +130,7 @@ public class Calc implements Runnable {
             rotate(y_norm, rot_speed);
             rot_speed += rot_acc;
         }
+        if(pressed_keys[' ']) shoot();
 
         if(!(pressed_keys['w'] || pressed_keys['a'] || pressed_keys['s'] || pressed_keys['d'] || pressed_keys['e'] || pressed_keys['q'])){
             rot_speed = 0;
@@ -145,16 +165,20 @@ public class Calc implements Runnable {
             }
         }
 
-        move();
+        if(shooting){
+            bullet.move(bullet_v);
+            if(bullet.pos.subtract(camera2.pos).mag > 10000) shooting = false;
+        }
+        if(!shooting){
+            bullet.hide();
+            bullet.cd(camera2.pos);
+        }
 
-        long end = System.currentTimeMillis();
-        t = (end - start);
+        move();
     }
 
     public void run() {
         while(true){
-            long start = System.currentTimeMillis();
-
             try { Thread.sleep(20); }
             catch(Exception e){}
 

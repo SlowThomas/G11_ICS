@@ -1,0 +1,25 @@
+# Object Export From Tinkercad Server 2015
+
+mtllib obj.mtl
+
+o obj_0
+v 0 -100 0
+v -50 0 0
+v 0 0 50
+v 50 0 0
+
+g group_0_15277357
+
+usemtl front
+s 0
+
+f 1 2 3
+f 1 3 4
+
+usemtl back
+
+f 1 2 4
+f 2 3 4
+
+ #end of obj_0
+

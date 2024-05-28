@@ -217,6 +217,8 @@ public class Scene {
         }
 
         public static void scale(Camera camera, Flat_Obj obj, Screen screen){
+            if(obj.hidden) return;
+
             Vector pos = camera.T_inverse.dot(obj.pos);
             float z = pos.at(2);
 

@@ -3,15 +3,17 @@ package engine;
 import algebra.*;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class Flat_Obj {
 
     public BufferedImage img;
-    public float scale = 1;
 
     public Vector pos = new Vector(0, 0, 0, 1);
+
+    public boolean hidden = false;
 
     public Flat_Obj(String filename){
         try{
@@ -20,6 +22,14 @@ public class Flat_Obj {
         catch (Exception e){
             System.err.println(e.getMessage());
         }
+    }
+
+    public void hide(){
+        hidden = true;
+    }
+
+    public void show(){
+        hidden = false;
     }
 
     public void move(Vector trail){
@@ -44,7 +54,8 @@ public class Flat_Obj {
         move(destination.subtract(pos));
     }
 
-    public void scale(float scale){
-        this.scale *= scale;
+    public void scale(double scale){
+
+        img = new BufferedImage(img.getScaledInstance((int)(img.getWidth() * scale), (int)(img.getHeight() * scale), Image.SCALE_FAST));
     }
 }
