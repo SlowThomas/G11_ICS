@@ -2,7 +2,6 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
-import java.sql.Time;
 
 import algebra.Vector;
 import engine.*;

@@ -34,8 +34,93 @@ public class Scene {
         }
     }
 
+
     private static class Algorithm {
-       private static final float epsilon = Consts.epsilon;
+        private static class Rendering_thread implements Runnable{
+            private static final float epsilon = Consts.epsilon;
+            public static int l, r, t, b;
+            public static Screen screen;
+            public static float[][] vect2;
+            public static int color;
+            public static int tot;
+            public int id;
+
+            public static boolean edgeFunction(float ax, float ay, float bx, float by, float px, float py) {
+                return (px - ax) * (by - ay) - (py - ay) * (bx - ax) >= 0;
+            }
+
+            public static boolean point_in_triangle(float px, float py, float[][] triangle){
+                boolean a = edgeFunction(triangle[0][0], triangle[0][1], triangle[1][0], triangle[1][1], px, py);
+                boolean b = edgeFunction(triangle[1][0], triangle[1][1], triangle[2][0], triangle[2][1], px, py);
+                boolean c = edgeFunction(triangle[2][0], triangle[2][1], triangle[0][0], triangle[0][1], px, py);
+                return !((a ^ b) | (b ^ c));
+            }
+
+            public static float z_buff(float x, float y, float[][] triangle){
+                // barycentric coordinate using the inverses. z_buffer's are linear to each other in terms of their inverses
+                if(Math.abs(triangle[0][2]) < epsilon || Math.abs(triangle[1][2]) < epsilon || Math.abs(triangle[2][2]) < epsilon)
+                    return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
+                float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
+
+                return 1 / Math.max(epsilon, (Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t) / triangle[2][2]
+                        + (Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t) / triangle[0][2]
+                        + (Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t) / triangle[1][2]);
+
+
+            }
+
+            public Rendering_thread(int id){
+                this.id = id;
+            }
+            public void run(){
+                float z;
+                for(int i = l + id; i <= r; i += tot){
+                    for(int j = t + id; j <= b; j += tot){
+                        if (point_in_triangle(i, j, vect2)) {
+                            z = z_buff(i, j, vect2);
+                            if (z < Consts.distance || screen.z_buffed[i][j] && z >= screen.z_buffer[i][j])
+                                continue;
+                            screen.colo[i][j] = color;
+                            screen.z_buffer[i][j] = z;
+                            screen.z_buffed[i][j] = true;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private static class Rendering_pool{
+            Thread[] pool;
+            public Rendering_pool(int thread_num, Screen screen, float[][] vect2, int color){
+                Rendering_thread.l = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
+                Rendering_thread.r = Math.min(Math.max((int)Math.max(Math.max(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
+                Rendering_thread.t = Math.min(Math.max((int)Math.min(Math.min(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
+                Rendering_thread.b = Math.min(Math.max((int)Math.max(Math.max(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
+                Rendering_thread.screen = screen;
+                Rendering_thread.vect2 = vect2;
+                Rendering_thread.color = color;
+
+                pool = new Thread[thread_num];
+                for(int i = 0; i < thread_num; i++){
+                    pool[i] = new Thread(new Rendering_thread(i));
+                }
+            }
+
+            public void start(){
+                for(Thread t : pool) t.start();
+
+                System.out.println("Threads started");
+
+                try {
+                    for(Thread t : pool) t.join();
+                }
+                catch (Exception e){
+                    System.err.println("Some threads failed to execute:\n" + e.getMessage());
+                }
+            }
+        }
+        private static final float epsilon = Consts.epsilon;
 
         private static float[] barycentric(float x, float y, float[][] triangle){
             float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
@@ -103,10 +188,15 @@ public class Scene {
 
                 int color = obj.material.get_Kd(obj.mtl[f_idx]);
 
+
                 int left = Math.min(Math.max((int)Math.min(Math.min(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
                 int right = Math.min(Math.max((int)Math.max(Math.max(vect2[0][0], vect2[1][0]), vect2[2][0]), 0), screen.width - 1);
                 int top = Math.min(Math.max((int)Math.min(Math.min(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
                 int bottom = Math.min(Math.max((int)Math.max(Math.max(vect2[0][1], vect2[1][1]), vect2[2][1]), 0), screen.height - 1);
+
+
+                //Rendering_pool pool = new Rendering_pool(1, screen, vect2, color);
+                //pool.start();
 
                 float z;
                 for (int i = left; i <= right; i++) {
