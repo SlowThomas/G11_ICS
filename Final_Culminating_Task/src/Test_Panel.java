@@ -52,18 +52,18 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        start = System.currentTimeMillis();
+        end = System.currentTimeMillis();
+        t = end - start;
+        start = end;
 
         calc.epoch();
         scene.render();
         g.drawImage(scene.canvas, 0, 0, null);
         g.setColor(new Color(255));
         if(t > 1E-14)
-            g.drawString((int)(1/t) + " FPS " + calc.t + " ms", 100, 100);
+            g.drawString((int)(1000.0/t) + " FPS " + calc.t + " ms", 100, 100);
         // g.drawString((int)calc.camera2.pos.at(0) / 100 + ", " + (int)calc.camera2.pos.at(1) / 100 + ", " + (int)calc.camera2.pos.at(2) / 100, 100, 100);
 
-        end = System.currentTimeMillis();
-        t = (end - start) / 1000.0;
     }
 
     public static void main(String[] args){
@@ -78,12 +78,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     public int frame_counter = 0;
-    public double t = 1;
-    public long start;
-    public long end;
+    public long t = 1;
+    public long start = 0;
+    public long end = 0;
     public void run() {
         while(true){
-            try { Thread.sleep(20); }
+            try { Thread.sleep(Math.max(0, 1000 / 10 - t)); }
             catch(Exception e){}
 
             repaint();

@@ -36,6 +36,7 @@ public class Scene {
 
 
     private static class Algorithm {
+        /*
         private static class Rendering_thread implements Runnable{
             private static final float epsilon = Consts.epsilon;
             public static int l, r, t, b;
@@ -119,8 +120,9 @@ public class Scene {
                     System.err.println("Some threads failed to execute:\n" + e.getMessage());
                 }
             }
-        }
+        } */
         private static final float epsilon = Consts.epsilon;
+
 
         private static float[] barycentric(float x, float y, float[][] triangle){
             float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
