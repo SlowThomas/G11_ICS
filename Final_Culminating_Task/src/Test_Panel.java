@@ -93,7 +93,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public long end = 0;
     public void run() {
         while(true){
-            try { Thread.sleep(20); }
+            try { Thread.sleep(50); }
             catch(Exception e){}
 
             repaint();
@@ -152,7 +152,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(calc.dragging){
                 if(calc.camera_mode == 0){
-                    calc.camera.rotate(calc.plane.pos, calc.camera2.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
                     calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
                 }
                 else if(calc.camera_mode == 1){
@@ -172,7 +172,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(calc.dragging){
                 if(calc.camera_mode == 0){
-                    calc.camera.rotate(calc.plane.pos, calc.camera2.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
                     calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
                 }
                 else if(calc.camera_mode == 1){

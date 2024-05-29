@@ -8,6 +8,12 @@ illum 0
 
 newmtl back
 Ka 0 0 0
+Kd 0.3 0.3 0.5
+d 1
+illum 0
+
+newmtl bottom
+Ka 0 0 0
 Kd 0.5 0.5 0.5
 d 1
 illum 0

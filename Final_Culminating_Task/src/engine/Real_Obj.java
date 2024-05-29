@@ -4,7 +4,7 @@ import algebra.*;
 import java.util.Scanner;
 import java.io.File;
 
-public class Obj {
+public class Real_Obj {
 
     private static class Consts{
         public static float epsilon = 1E-10f; // another choice: 1E-14
@@ -30,7 +30,7 @@ public class Obj {
             {0, 0, 0, 1}
     }); // world space transformation
 
-    public Obj(String object_name){
+    public Real_Obj(String object_name){
         material = new Mtl("objects/" + object_name + "/obj.mtl");
 
         Scanner file;

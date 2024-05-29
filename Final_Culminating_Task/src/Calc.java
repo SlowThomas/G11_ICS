@@ -3,57 +3,56 @@ import engine.*;
 
 public class Calc implements Runnable {
 
-    public Obj cube = new Obj("Cube");
-    public Obj plane = new Obj("Arrow");
+    public Real_Obj cube = new Real_Obj("Cube");
+    public Real_Obj plane = new Real_Obj("Arrow");
 
     public Flat_Obj bullet = new Flat_Obj("Bullet.png");
 
     public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
     public Camera camera = new Camera(0, 100, -3000);
-    public Camera camera2 = new Camera(0, 0, 0);
+    public Camera camera2 = new Camera(0, 0, 100);
+    public Camera plane_origin = new Camera(0, 0, 0);
 
     public Scene scene;
 
     // mounting points
-    public Camera[] cameras;
-    public Obj[] objs;
+    public Real_Obj[] objs;
     public Flat_Obj[] flat_objs;
     public Label_Obj[] label_objs;
 
     public Calc(){
         plane.auto_origin();
 
-        bullet.scale(1.5);
+        crosshair.scale(0.5);
 
-        cameras = new Camera[]{camera, camera2};
-        objs = new Obj[]{cube, plane};
+        objs = new Real_Obj[]{cube, plane};
         flat_objs = new Flat_Obj[]{bullet};
         label_objs = new Label_Obj[]{crosshair};
-        scene = new Scene(800, 450, 5, cameras, objs, flat_objs, label_objs);
+        scene = new Scene(800, 450, 5, camera, objs, flat_objs, label_objs);
     }
 
 
     public Vector velocity = new Vector(0, 0, 0);
-    public Vector x_norm = camera.x_norm;
-    public Vector y_norm = camera.y_norm;
-    public Vector z_norm = camera.z_norm;
+    public Vector x_norm;
+    public Vector y_norm;
+    public Vector z_norm;
 
     public void rotate(Vector axis, float angle){
         plane.rotate(axis, angle);
         if(camera_mode == 0)
             camera.rotate(plane.pos, axis, angle);
-        camera2.rotate(axis, angle);
+        plane_origin.rotate(axis, angle);
     }
 
     public void move(){
         plane.move(velocity);
         camera.move(velocity);
-        camera2.move(velocity);
+        plane_origin.move(velocity);
     }
 
     public int frame_counter = 0;
-    public double sensitivity = 0.01;
+    public double sensitivity = 0.005;
 
     public double mouse_dx;
     public double mouse_dy;
@@ -65,8 +64,11 @@ public class Calc implements Runnable {
     public double t;
 
     float rot_speed_max;
-    float rot_speed = 0;
+    float rot_speed_x = 0;
+    float rot_speed_y = 0;
+    float rot_speed_z = 0;
     float rot_acc = 0.005f;
+
     float zoom = 1.1f;
     float acc = 0.2f;
 
@@ -78,14 +80,18 @@ public class Calc implements Runnable {
 
     public void shoot(){
         bullet.show();
-        bullet.cd(camera2.pos);
-        bullet_v = velocity.add(z_norm.mult(100));
+        bullet.cd(plane_origin.pos);
+        bullet_v = velocity.add(z_norm.mult(1000));
 
         shooting = true;
     }
 
-    public void epoch(){
+    public void epoch(long time){
         scene.render();
+
+        x_norm = plane_origin.x_norm;
+        y_norm = plane_origin.y_norm;
+        z_norm = plane_origin.z_norm;
 
         crosshair.cd(plane.pos);
         crosshair.move(z_norm.mult(100000));
@@ -99,10 +105,6 @@ public class Calc implements Runnable {
             rot_acc = 0.01f;
         }
 
-        x_norm = camera2.x_norm;
-        y_norm = camera2.y_norm;
-        z_norm = camera2.z_norm;
-
         if(pressed_keys['l']){
             cube.scale(zoom);
 
@@ -112,45 +114,51 @@ public class Calc implements Runnable {
         }
 
         if(pressed_keys['w']){
-            rotate(x_norm, rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_x < 0) rot_speed_x = 0;
+            rot_speed_x += rot_acc;
         }
         if(pressed_keys['s']){
-            rotate(x_norm, -rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_x > 0) rot_speed_x = 0;
+            rot_speed_x -= rot_acc;
         }
         if(pressed_keys['a']){
-            rotate(z_norm, rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_z < 0) rot_speed_z = 0;
+            rot_speed_z += rot_acc;
         }
         if(pressed_keys['d']){
-            rotate(z_norm, -rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_z > 0) rot_speed_z = 0;
+            rot_speed_z -= rot_acc;
         }
         if(pressed_keys['q']){
-            rotate(y_norm, -rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_y > 0) rot_speed_y = 0;
+            rot_speed_y -= rot_acc;
         }
         if(pressed_keys['e']){
-            rotate(y_norm, rot_speed);
-            rot_speed += rot_acc;
+            if(rot_speed_y < 0) rot_speed_y = 0;
+            rot_speed_y += rot_acc;
         }
-        if(pressed_keys[' '] || pressed_keys['k']) shoot();
+        if(!pressed_keys['w'] && !pressed_keys['s']) rot_speed_x = 0;
+        if(!pressed_keys['a'] && !pressed_keys['d']) rot_speed_z = 0;
+        if(!pressed_keys['q'] && !pressed_keys['e']) rot_speed_y = 0;
 
-        if(!(pressed_keys['w'] || pressed_keys['a'] || pressed_keys['s'] || pressed_keys['d'] || pressed_keys['e'] || pressed_keys['q'])){
-            rot_speed = 0;
-        }
+        rot_speed_x = Math.max(Math.min(rot_speed_x, rot_speed_max), -rot_speed_max);
+        rot_speed_y = Math.max(Math.min(rot_speed_y, rot_speed_max), -rot_speed_max);
+        rot_speed_z = Math.max(Math.min(rot_speed_z, rot_speed_max), -rot_speed_max);
+
+        rotate(x_norm, rot_speed_x);
+        rotate(y_norm, rot_speed_y);
+        rotate(z_norm, rot_speed_z);
+
+        if(pressed_keys[' '] || pressed_keys['k']) shoot();
 
         if(camera_mode != 0 && pressed_keys['1']){
             camera.rotate(plane.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
-            camera.rotate(camera2.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
+            camera.rotate(plane_origin.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
             camera_mode = 0;
         }
-        if(pressed_keys['2']){
+        if(camera_mode != 1 && pressed_keys['2']){
             camera_mode = 1;
         }
-
-        rot_speed = Math.max(0, Math.min(rot_speed_max, rot_speed));
 
         if(accelerating || pressed_keys['j']){
             velocity = velocity.add(z_norm.mult(acc));
@@ -161,22 +169,34 @@ public class Calc implements Runnable {
 
         if(shooting){
             bullet.move(bullet_v);
-            if(bullet.pos.subtract(camera2.pos).mag > 100000) shooting = false; // 100 meters
+            if(bullet.pos.subtract(plane_origin.pos).mag > 100000) shooting = false; // 100 meters
         }
         if(!shooting){
             bullet.hide();
-            bullet.cd(camera2.pos);
+            bullet.cd(plane_origin.pos);
         }
 
         move();
     }
 
     public void run() {
-        while(true){
-            try { Thread.sleep(10); }
-            catch(Exception e){}
+        long start = System.currentTimeMillis(), end = start, time;
 
-            epoch();
+        while(true){
+            // Aim for 20 Hz update
+            time = end - start;
+            start = end;
+            if(time <= 50){
+                try { Thread.sleep(50 - time); }
+                catch(Exception e){}
+                System.out.println("normal");
+                epoch(50);
+            }
+            else{
+                System.out.println("accelerating");
+                epoch(time);
+            }
+            end = System.currentTimeMillis();
         }
     }
 }

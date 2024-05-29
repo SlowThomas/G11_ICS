@@ -1,10 +1,7 @@
 package engine;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import algebra.*;
-
-import javax.swing.*;
 
 
 public class Scene {
@@ -163,7 +160,7 @@ public class Scene {
 
         }
 
-        private static void getProjected(Camera camera, Obj obj, Screen screen, float pixel_per_mm, int[] vertex_idx, float[][] vect2) {
+        private static void getProjected(Camera camera, Real_Obj obj, Screen screen, float pixel_per_mm, int[] vertex_idx, float[][] vect2) {
             Vector v0 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[0] - 1])));
             Vector v1 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[1] - 1])));
             Vector v2 = camera.T_inverse.dot(obj.T_world.dot(obj.T_model.dot(obj.v[vertex_idx[2] - 1])));
@@ -183,7 +180,7 @@ public class Scene {
             vect2[2][2] = z2;
         }
 
-        public static void rasterize(Camera camera, Obj obj, Screen screen, float resolution){
+        public static void rasterize(Camera camera, Real_Obj obj, Screen screen, float resolution){
             float[][] vect2 = new float[3][3];
             for (int f_idx = 0; f_idx < obj.f.length; f_idx++) {
                 getProjected(camera, obj, screen, resolution, obj.f[f_idx], vect2);
@@ -284,11 +281,11 @@ public class Scene {
     }
 
 
-    private Obj[] obj_list;
+    private Real_Obj[] obj_list;
     private Flat_Obj[] flat_objs;
     private Label_Obj[] label_objs;
-    private Camera[] cameras;
-    public int view_idx = 0;
+
+    private Camera camera;
 
     private Screen screen;
 
@@ -297,11 +294,11 @@ public class Scene {
     private float resolution;
     public BufferedImage canvas;
 
-    public Scene(int width, int height, float resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs, Label_Obj[] label_objs){
+    public Scene(int width, int height, float resolution, Camera camera, Real_Obj[] obj_list, Flat_Obj[] flat_objs, Label_Obj[] label_objs){
         this.obj_list = obj_list;
         this.flat_objs = flat_objs;
         this.label_objs = label_objs;
-        this.cameras = cameras;
+        this.camera = camera;
         this.width = width;
         this.height = height;
         this.resolution = resolution; // resolution in pixel per mm
@@ -311,17 +308,21 @@ public class Scene {
         screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
     }
 
+    public void mount_camera(Camera camera){
+        this.camera = camera;
+    }
+
     public void render(){
-        for(Obj obj : obj_list){
-            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
+        for(Real_Obj obj : obj_list){
+            Algorithm.rasterize(camera, obj, screen, resolution);
         }
 
         for(Flat_Obj obj : flat_objs){
-            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
+            Algorithm.rasterize(camera, obj, screen, resolution);
         }
 
         for(Label_Obj obj : label_objs){
-            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
+            Algorithm.rasterize(camera, obj, screen, resolution);
         }
 
         // TODO: SSAA with ImgFunc.adjustedColor()
