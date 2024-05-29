@@ -13,7 +13,7 @@ public class ImageBuffer {
                 colo[i][j][0] = color / (1 << 16) % (1 << 8);
                 colo[i][j][1] = color / (1 << 8) % (1 << 8);
                 colo[i][j][2] = color % (1 << 8);
-                colo[i][j][3] = color / (1 << 24) % (1 << 8); // opacity
+                colo[i][j][3] = color >>> 24; // opacity
             }
         }
 
@@ -35,6 +35,6 @@ public class ImageBuffer {
         if(t > 0) for(int i = 0; i < colo[0][0].length; i++) color[i] -= colo[r - 1][t - 1][i];
         if(l > 0 && t > 0) for(int i = 0; i < colo[0][0].length; i++) color[i] += colo[l - 1][t - 1][i];
         for(int i = 0; i < colo[0][0].length; i++) color[i] /= (r - l) * (b - t);
-        return color[3] * (1 << 24) + color[0] * (1 << 16) + color[1] * (1 << 8) + color[2];
+        return (color[3] << 24) + (color[0] << 16) + (color[1] << 8) + color[2];
     }
 }
