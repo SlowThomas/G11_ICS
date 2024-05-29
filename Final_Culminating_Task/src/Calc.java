@@ -9,7 +9,7 @@ public class Calc implements Runnable {
     public Obj cube = new Obj("Cube");
     public Obj plane = new Obj("Arrow");
 
-    public Flat_Obj bullet = new Flat_Obj("Bullet.png");
+    public Flat_Obj bullet = new Flat_Obj("Light_Ball.png");
 
     public Camera camera = new Camera(0, 100, -3000);
     public Camera camera2 = new Camera(0, 0, 0);
@@ -24,7 +24,7 @@ public class Calc implements Runnable {
     public Calc(){
         plane.auto_origin();
 
-        bullet.scale(0.1);
+        bullet.scale(10);
 
         cameras = new Camera[]{camera, camera2};
         objs = new Obj[]{cube, plane};
@@ -67,7 +67,7 @@ public class Calc implements Runnable {
     float rot_speed = 0;
     float rot_acc = 0.005f;
     float zoom = 1.1f;
-    float acc = 0.5f;
+    float acc = 0.2f;
 
     public Vector bullet_v;
 
@@ -78,7 +78,7 @@ public class Calc implements Runnable {
     public void shoot(){
         bullet.show();
         bullet.cd(camera2.pos);
-        bullet_v = velocity.add(z_norm.mult(10));
+        bullet_v = velocity.add(z_norm.mult(100));
 
         shooting = true;
     }
@@ -87,7 +87,7 @@ public class Calc implements Runnable {
         scene.render();
         if(camera_mode == 0){
             rot_speed_max = 0.01f;
-            rot_acc = 0.002f;
+            rot_acc = 0.001f;
         }
         else if(camera_mode == 1){
             rot_speed_max = 0.1f;
@@ -139,7 +139,6 @@ public class Calc implements Runnable {
         if(camera_mode != 0 && pressed_keys['1']){
             camera.rotate(plane.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
             camera.rotate(camera2.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
-            //camera.rotate(camera2.pos, camera.z_norm.cross(z_norm), (float)Math.acos(camera.z_norm.dot(z_norm)));
             camera_mode = 0;
         }
         if(pressed_keys['2']){
@@ -154,20 +153,10 @@ public class Calc implements Runnable {
         if(decelerating){
             velocity = velocity.subtract(z_norm.mult(acc));
         }
-        if(dragging){
-            if(camera_mode == 0){
-                camera.rotate(plane.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
-                camera.rotate(plane.pos, camera.x_norm, (float) (sensitivity * mouse_dy));
-            }
-            else if(camera_mode == 1){
-                camera.rotate(plane.pos, camera.y_norm, (float) (sensitivity * mouse_dx));
-                camera.rotate(plane.pos, camera.x_norm, (float) (sensitivity * mouse_dy));
-            }
-        }
 
         if(shooting){
             bullet.move(bullet_v);
-            if(bullet.pos.subtract(camera2.pos).mag > 10000) shooting = false;
+            if(bullet.pos.subtract(camera2.pos).mag > 100000) shooting = false; // 100 meters
         }
         if(!shooting){
             bullet.hide();
@@ -179,7 +168,7 @@ public class Calc implements Runnable {
 
     public void run() {
         while(true){
-            try { Thread.sleep(20); }
+            try { Thread.sleep(10); }
             catch(Exception e){}
 
             epoch();

@@ -216,7 +216,7 @@ public class Scene {
             }
         }
 
-        public static void scale(Camera camera, Flat_Obj obj, Screen screen){
+        public static void scale(Camera camera, Flat_Obj obj, Screen screen, float resolution){
             if(obj.hidden) return;
 
             Vector pos = camera.T_inverse.dot(obj.pos);
@@ -224,11 +224,11 @@ public class Scene {
 
             if(z < Consts.distance) return;
 
-            int width = (int)(obj.img.getWidth() * Consts.distance / z);
-            int height = (int)(obj.img.getHeight() * Consts.distance / z);
+            int width = (int)(obj.img.getWidth() * obj.scale * Consts.distance / z);
+            int height = (int)(obj.img.getHeight() * obj.scale * Consts.distance / z);
 
-            float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z;
-            float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z;
+            float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z * resolution;
+            float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z * resolution;
 
             int l = (int)x - width / 2;
             int r = (int)x + width / 2 - (width + 1) % 2;
@@ -237,13 +237,11 @@ public class Scene {
 
             if(r < 0 || l > screen.width || b < 0 || t > screen.height) return;
 
-            BufferedImage img = (BufferedImage) obj.img.getScaledInstance(width, height, Image.SCALE_FAST);
-
             for(int i = l; i <= r; i++){
                 for(int j = t; j <= b; j++){
                     if(i < 0 || j < 0 || i >= screen.width || j >= screen.height ||
                             screen.z_buffed[i][j] && z > screen.z_buffer[i][j]) continue;
-                    screen.colo[i][j] = img.getRGB(i - l, j - t);
+                    screen.colo[i][j] = ImgFunc.adjustedColor(obj.img_buffer, r - l + 1, b - t + 1, i - l, j - t);
                     screen.z_buffed[i][j] = true;
                     screen.z_buffer[i][j] = z;
                 }
@@ -283,9 +281,10 @@ public class Scene {
         }
 
         for(Flat_Obj obj : flat_objs){
-            Algorithm.scale(cameras[view_idx], obj, screen);
+            Algorithm.scale(cameras[view_idx], obj, screen, resolution);
         }
 
+        // TODO: SSAA with ImgFunc.adjustedColor()
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
                 canvas.setRGB(x, y, screen.colo[x * screen.width / width][y * screen.height / height]);

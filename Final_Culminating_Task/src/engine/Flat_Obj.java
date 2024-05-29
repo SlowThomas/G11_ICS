@@ -10,6 +10,8 @@ import java.io.File;
 public class Flat_Obj {
 
     public BufferedImage img;
+    public ImageBuffer img_buffer;
+    public double scale = 1;
 
     public Vector pos = new Vector(0, 0, 0, 1);
 
@@ -22,6 +24,7 @@ public class Flat_Obj {
         catch (Exception e){
             System.err.println(e.getMessage());
         }
+        img_buffer = new ImageBuffer(img);
     }
 
     public void hide(){
@@ -55,7 +58,6 @@ public class Flat_Obj {
     }
 
     public void scale(double scale){
-
-        img = new BufferedImage(img.getScaledInstance((int)(img.getWidth() * scale), (int)(img.getHeight() * scale), Image.SCALE_FAST));
+        this.scale *= scale;
     }
 }

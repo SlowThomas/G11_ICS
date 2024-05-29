@@ -60,7 +60,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
          */
         g.drawImage(scene.canvas, 0, 0, null);
-        g.setColor(new Color(255));
+        g.setColor(new Color(255, 255, 255));
+        if(calc.camera_mode == 0){
+            g.drawString("Aiming Mode", 50, 100);
+        }
+        else if(calc.camera_mode == 1){
+            g.drawString("Maneuver Mode", 50, 100);
+        }
         /*
         if(t > 1E-14)
             g.drawString((int)(1000.0/t) + " FPS ", 100, 100);
@@ -143,6 +149,18 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         if(calc != null && calc.dragging) {
             calc.mouse_dx = e.getX() - getWidth() / 2.0;
             calc.mouse_dy = e.getY() - getHeight() / 2.0;
+
+            if(calc.dragging){
+                if(calc.camera_mode == 0){
+                    calc.camera.rotate(calc.plane.pos, calc.camera2.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                }
+                else if(calc.camera_mode == 1){
+                    calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                }
+            }
+
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
@@ -151,6 +169,18 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         if(calc != null && calc.dragging) {
             calc.mouse_dx = e.getX() - getWidth() / 2.0;
             calc.mouse_dy = e.getY() - getHeight() / 2.0;
+
+            if(calc.dragging){
+                if(calc.camera_mode == 0){
+                    calc.camera.rotate(calc.plane.pos, calc.camera2.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                }
+                else if(calc.camera_mode == 1){
+                    calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                }
+            }
+
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
