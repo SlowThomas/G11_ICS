@@ -216,7 +216,7 @@ public class Scene {
             }
         }
 
-        public static void scale(Camera camera, Flat_Obj obj, Screen screen, float resolution){
+        public static void rasterize(Camera camera, Flat_Obj obj, Screen screen, float resolution){
             if(obj.hidden) return;
 
             Vector pos = camera.T_inverse.dot(obj.pos);
@@ -239,20 +239,55 @@ public class Scene {
 
             for(int i = l; i <= r; i++){
                 for(int j = t; j <= b; j++){
+                    int color = ImgFunc.adjustedColor(obj.img_buffer, r - l + 1, b - t + 1, i - l, j - t);
                     if(i < 0 || j < 0 || i >= screen.width || j >= screen.height ||
+                            color / (1 << 24) == 0 ||
                             screen.z_buffed[i][j] && z > screen.z_buffer[i][j]) continue;
-                    screen.colo[i][j] = ImgFunc.adjustedColor(obj.img_buffer, r - l + 1, b - t + 1, i - l, j - t);
+                    screen.colo[i][j] = color;
                     screen.z_buffed[i][j] = true;
                     screen.z_buffer[i][j] = z;
+                }
+            }
+        }
+
+        public static void rasterize(Camera camera, Label_Obj obj, Screen screen, float resolution){
+            if(obj.hidden) return;
+
+            Vector pos = camera.T_inverse.dot(obj.pos);
+            float z = pos.at(2);
+
+            if(z < Consts.distance) return;
+
+            int width = (int)(obj.img.getWidth() * obj.scale);
+            int height = (int)(obj.img.getHeight() * obj.scale);
+
+            float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z * resolution;
+            float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z * resolution;
+
+            int l = (int)x - width / 2;
+            int r = (int)x + width / 2 - (width + 1) % 2;
+            int t = (int)y - height / 2;
+            int b = (int)y + height / 2 - (height + 1) % 2;
+
+            if(r < 0 || l > screen.width || b < 0 || t > screen.height) return;
+
+            for(int i = l; i <= r; i++){
+                for(int j = t; j <= b; j++){
+                    int color = ImgFunc.adjustedColor(obj.img_buffer, r - l + 1, b - t + 1, i - l, j - t);
+                    if(i < 0 || j < 0 || i >= screen.width || j >= screen.height || color / (1 << 24) == 0) continue;
+                    screen.colo[i][j] = color;
+                    screen.z_buffed[i][j] = true;
+                    screen.z_buffer[i][j] = 0;
                 }
             }
         }
     }
 
 
-    private Obj[] obj_list = new Obj[0];
-    private Flat_Obj[] flat_objs = new Flat_Obj[0];
-    private Camera[] cameras = new Camera[0];
+    private Obj[] obj_list;
+    private Flat_Obj[] flat_objs;
+    private Label_Obj[] label_objs;
+    private Camera[] cameras;
     public int view_idx = 0;
 
     private Screen screen;
@@ -262,9 +297,10 @@ public class Scene {
     private float resolution;
     public BufferedImage canvas;
 
-    public Scene(int width, int height, float resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs){
+    public Scene(int width, int height, float resolution, Camera[] cameras, Obj[] obj_list, Flat_Obj[] flat_objs, Label_Obj[] label_objs){
         this.obj_list = obj_list;
         this.flat_objs = flat_objs;
+        this.label_objs = label_objs;
         this.cameras = cameras;
         this.width = width;
         this.height = height;
@@ -281,7 +317,11 @@ public class Scene {
         }
 
         for(Flat_Obj obj : flat_objs){
-            Algorithm.scale(cameras[view_idx], obj, screen, resolution);
+            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
+        }
+
+        for(Label_Obj obj : label_objs){
+            Algorithm.rasterize(cameras[view_idx], obj, screen, resolution);
         }
 
         // TODO: SSAA with ImgFunc.adjustedColor()

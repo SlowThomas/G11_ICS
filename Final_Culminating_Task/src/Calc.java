@@ -1,15 +1,14 @@
 import algebra.Vector;
-import engine.Camera;
-import engine.Flat_Obj;
-import engine.Obj;
-import engine.Scene;
+import engine.*;
 
 public class Calc implements Runnable {
 
     public Obj cube = new Obj("Cube");
     public Obj plane = new Obj("Arrow");
 
-    public Flat_Obj bullet = new Flat_Obj("Light_Ball.png");
+    public Flat_Obj bullet = new Flat_Obj("Bullet.png");
+
+    public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
     public Camera camera = new Camera(0, 100, -3000);
     public Camera camera2 = new Camera(0, 0, 0);
@@ -20,16 +19,18 @@ public class Calc implements Runnable {
     public Camera[] cameras;
     public Obj[] objs;
     public Flat_Obj[] flat_objs;
+    public Label_Obj[] label_objs;
 
     public Calc(){
         plane.auto_origin();
 
-        bullet.scale(10);
+        bullet.scale(1.5);
 
         cameras = new Camera[]{camera, camera2};
         objs = new Obj[]{cube, plane};
         flat_objs = new Flat_Obj[]{bullet};
-        scene = new Scene(800, 450, 10, cameras, objs, flat_objs);
+        label_objs = new Label_Obj[]{crosshair};
+        scene = new Scene(800, 450, 5, cameras, objs, flat_objs, label_objs);
     }
 
 
@@ -85,6 +86,10 @@ public class Calc implements Runnable {
 
     public void epoch(){
         scene.render();
+
+        crosshair.cd(plane.pos);
+        crosshair.move(z_norm.mult(100000));
+
         if(camera_mode == 0){
             rot_speed_max = 0.01f;
             rot_acc = 0.001f;
@@ -130,7 +135,7 @@ public class Calc implements Runnable {
             rotate(y_norm, rot_speed);
             rot_speed += rot_acc;
         }
-        if(pressed_keys[' ']) shoot();
+        if(pressed_keys[' '] || pressed_keys['k']) shoot();
 
         if(!(pressed_keys['w'] || pressed_keys['a'] || pressed_keys['s'] || pressed_keys['d'] || pressed_keys['e'] || pressed_keys['q'])){
             rot_speed = 0;
@@ -147,7 +152,7 @@ public class Calc implements Runnable {
 
         rot_speed = Math.max(0, Math.min(rot_speed_max, rot_speed));
 
-        if(accelerating){
+        if(accelerating || pressed_keys['j']){
             velocity = velocity.add(z_norm.mult(acc));
         }
         if(decelerating){
