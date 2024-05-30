@@ -8,11 +8,11 @@ import java.util.ListIterator;
 public class Calc implements Runnable {
 
     public Real_Obj cube = new Real_Obj("Cube");
-    public Real_Obj plane = new Real_Obj("Arrow");
+    public Real_Obj plane = new Real_Obj("Ship");
     public Flat_Obj bullet = new Flat_Obj("Bullet.png");
     public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
-    public Camera camera = new Camera(0, 0, 100);
+    public Camera camera = new Camera(0, 0, -530);
     public Camera camera2 = new Camera(0, 100, -3000);
     public Camera plane_origin = new Camera(0, 0, 0);
 
@@ -20,22 +20,22 @@ public class Calc implements Runnable {
 
     public Calc(){
         plane.auto_origin();
+        plane.scale(3);
 
         crosshair.scale(0.5);
         bullet.scale(0.5);
 
-        scene = new Scene(800, 450, 5);
+        scene = new Scene(800, 450, 2);
         scene.mount_camera(camera2);
     }
 
     public int fps = 0;
 
-    public int camera_mode = 1;
+    public int camera_mode = 0;
 
     public double sensitivity = 0.005;
 
     public float zoom = 1.1f;
-    public float bullet_life = 1e5f;
 
     public double mouse_dx;
     public double mouse_dy;
@@ -57,13 +57,16 @@ public class Calc implements Runnable {
     public Vector y_norm;
     public Vector z_norm;
 
+    public float bullet_life = 5000;
     public LinkedList<Flat_Obj> bullets = new LinkedList<>();
     public LinkedList<Vector> bullets_v = new LinkedList<>();
-
+    public LinkedList<Float> bullet_time = new LinkedList<>();
     public ListIterator<Flat_Obj> bullet_instance_it;
     public ListIterator<Vector> bullet_velocity_it;
+    public ListIterator<Float> bullet_time_it;
     public Flat_Obj bullet_instance;
     public Vector instance_velocity;
+    public Float instance_time;
 
 
     public float adjust(float n, long time){
@@ -92,6 +95,7 @@ public class Calc implements Runnable {
     public void shoot(){
         bullets.add(new Flat_Obj(bullet));
         bullets_v.add(velocity.add(z_norm.mult(1000)));
+        bullet_time.add(bullet_life);
     }
 
     public void epoch(long time){
@@ -110,7 +114,7 @@ public class Calc implements Runnable {
         y_norm = plane_origin.y_norm;
         z_norm = plane_origin.z_norm;
         crosshair.cd(plane.pos);
-        crosshair.move(z_norm.mult(bullet_life));
+        crosshair.move(z_norm.mult(50000f)); // 500 meters
 
 
         if(camera_mode == 0){
@@ -168,20 +172,20 @@ public class Calc implements Runnable {
         if(pressed_keys['1']){
             camera_mode = 0;
             // TODO: not working when looking back
-            camera.rotate(plane_origin.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
-            camera.rotate(plane_origin.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
+            // camera.rotate(plane_origin.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
+            // camera.rotate(plane_origin.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
             scene.mount_camera(camera);
         }
         if(pressed_keys['2']){
             camera_mode = 1;
             // TODO: not working when looking back
-            camera2.rotate(plane_origin.pos, camera2.x_norm.cross(x_norm), (float)Math.acos(camera2.x_norm.dot(x_norm)));
-            camera2.rotate(plane_origin.pos, camera2.y_norm.cross(y_norm), (float)Math.acos(camera2.y_norm.dot(y_norm)));
+            // camera2.rotate(plane_origin.pos, camera2.x_norm.cross(x_norm), (float)Math.acos(camera2.x_norm.dot(x_norm)));
+            // camera2.rotate(plane_origin.pos, camera2.y_norm.cross(y_norm), (float)Math.acos(camera2.y_norm.dot(y_norm)));
             scene.mount_camera(camera2);
         }
         if(camera_mode == 0){
-            camera.rotate(plane_origin.pos, plane_origin.y_norm, (float) (sensitivity * mouse_dx));
-            camera.rotate(plane_origin.pos, camera.x_norm, (float) (sensitivity * mouse_dy));
+            // camera.rotate(plane_origin.y_norm, (float) (sensitivity * mouse_dx));
+            // camera.rotate(camera.x_norm, (float) (sensitivity * mouse_dy));
         }
         else if(camera_mode == 1){
             camera2.rotate(plane_origin.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
@@ -195,20 +199,24 @@ public class Calc implements Runnable {
         if(!bullets.isEmpty()){
             bullet_instance_it = bullets.listIterator();
             bullet_velocity_it = bullets_v.listIterator();
+            bullet_time_it = bullet_time.listIterator();
             while(bullet_instance_it.hasNext()){
                 bullet_instance = bullet_instance_it.next();
                 instance_velocity = bullet_velocity_it.next();
-                if(bullet_instance.pos.subtract(plane_origin.pos).mag > bullet_life){
+                instance_time = bullet_time_it.next();
+                scene.rasterize(bullet_instance);
+                bullet_instance.move(adjust(instance_velocity, time));
+                bullet_time_it.set(instance_time - time);
+                if(instance_time <= 0){
                     bullet_instance_it.remove();
                     bullet_velocity_it.remove();
+                    bullet_time_it.remove();
                 }
-                bullet_instance.move(adjust(instance_velocity, time));
-
-                scene.rasterize(bullet_instance);
             }
         }
 
-        scene.rasterize(plane);
+        if(camera_mode != 0)
+            scene.rasterize(plane);
         scene.rasterize(crosshair);
         scene.rasterize(cube);
 

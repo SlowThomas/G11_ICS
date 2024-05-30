@@ -76,7 +76,7 @@ public class Real_Obj {
             }
             else if(para[1].equals("v")){
                 // vertex
-                v[v_len++] = new Vector(Float.parseFloat(para[2]), Float.parseFloat(para[4]), -Float.parseFloat(para[3]), 1);
+                v[v_len++] = new Vector(Float.parseFloat(para[2]), Float.parseFloat(para[3]), Float.parseFloat(para[4]), 1);
             }
             else if(para[1].equals("f")){
                 // face
