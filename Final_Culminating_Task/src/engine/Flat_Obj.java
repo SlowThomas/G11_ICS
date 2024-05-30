@@ -15,8 +15,6 @@ public class Flat_Obj {
 
     public Vector pos = new Vector(0, 0, 0, 1);
 
-    public boolean hidden = false;
-
     public Flat_Obj(String filename){
         try{
             img = ImageIO.read(new File("img/" + filename));
@@ -27,12 +25,11 @@ public class Flat_Obj {
         img_buffer = new ImageBuffer(img);
     }
 
-    public void hide(){
-        hidden = true;
-    }
-
-    public void show(){
-        hidden = false;
+    public Flat_Obj(Flat_Obj obj){
+        img = obj.img;
+        img_buffer = obj.img_buffer;
+        scale = obj.scale;
+        pos = obj.pos;
     }
 
     public void move(Vector trail){

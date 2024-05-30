@@ -214,8 +214,6 @@ public class Scene {
         }
 
         public static void rasterize(Camera camera, Flat_Obj obj, Screen screen, float resolution){
-            if(obj.hidden) return;
-
             Vector pos = camera.T_inverse.dot(obj.pos);
             float z = pos.at(2);
 
@@ -248,8 +246,6 @@ public class Scene {
         }
 
         public static void rasterize(Camera camera, Label_Obj obj, Screen screen, float resolution){
-            if(obj.hidden) return;
-
             Vector pos = camera.T_inverse.dot(obj.pos);
             float z = pos.at(2);
 
@@ -280,11 +276,6 @@ public class Scene {
         }
     }
 
-
-    private Real_Obj[] obj_list;
-    private Flat_Obj[] flat_objs;
-    private Label_Obj[] label_objs;
-
     private Camera camera;
 
     private Screen screen;
@@ -294,11 +285,7 @@ public class Scene {
     private float resolution;
     public BufferedImage canvas;
 
-    public Scene(int width, int height, float resolution, Camera camera, Real_Obj[] obj_list, Flat_Obj[] flat_objs, Label_Obj[] label_objs){
-        this.obj_list = obj_list;
-        this.flat_objs = flat_objs;
-        this.label_objs = label_objs;
-        this.camera = camera;
+    public Scene(int width, int height, float resolution){
         this.width = width;
         this.height = height;
         this.resolution = resolution; // resolution in pixel per mm
@@ -312,19 +299,19 @@ public class Scene {
         this.camera = camera;
     }
 
+    public void rasterize(Real_Obj obj){
+        Algorithm.rasterize(camera, obj, screen, resolution);
+    }
+
+    public void rasterize(Flat_Obj obj){
+        Algorithm.rasterize(camera, obj, screen, resolution);
+    }
+
+    public void rasterize(Label_Obj obj){
+        Algorithm.rasterize(camera, obj, screen, resolution);
+    }
+
     public void render(){
-        for(Real_Obj obj : obj_list){
-            Algorithm.rasterize(camera, obj, screen, resolution);
-        }
-
-        for(Flat_Obj obj : flat_objs){
-            Algorithm.rasterize(camera, obj, screen, resolution);
-        }
-
-        for(Label_Obj obj : label_objs){
-            Algorithm.rasterize(camera, obj, screen, resolution);
-        }
-
         // TODO: SSAA with ImgFunc.adjustedColor()
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){

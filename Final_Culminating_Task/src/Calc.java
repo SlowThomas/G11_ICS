@@ -1,6 +1,9 @@
 import algebra.Vector;
 import engine.*;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 public class Calc implements Runnable {
 
     public Real_Obj cube = new Real_Obj("Cube");
@@ -16,20 +19,14 @@ public class Calc implements Runnable {
 
     public Scene scene;
 
-    // mounting points
-    public Real_Obj[] objs;
-    public Flat_Obj[] flat_objs;
-    public Label_Obj[] label_objs;
-
     public Calc(){
         plane.auto_origin();
 
         crosshair.scale(0.5);
+        bullet.scale(0.5);
 
-        objs = new Real_Obj[]{cube, plane};
-        flat_objs = new Flat_Obj[]{bullet};
-        label_objs = new Label_Obj[]{crosshair};
-        scene = new Scene(800, 450, 5, camera, objs, flat_objs, label_objs);
+        scene = new Scene(800, 450, 5);
+        scene.mount_camera(camera2);
     }
 
 
@@ -40,15 +37,16 @@ public class Calc implements Runnable {
 
     public void rotate(Vector axis, float angle){
         plane.rotate(axis, angle);
-        if(camera_mode == 0)
-            camera.rotate(plane.pos, axis, angle);
         plane_origin.rotate(axis, angle);
+        camera2.rotate(plane_origin.pos, axis, angle);
     }
 
     public void move(){
         plane.move(velocity);
         camera.move(velocity);
+        camera2.move(velocity);
         plane_origin.move(velocity);
+        bullet.move(velocity);
     }
 
     public int frame_counter = 0;
@@ -74,21 +72,23 @@ public class Calc implements Runnable {
 
     public Vector bullet_v;
 
+    public LinkedList<Flat_Obj> bullets = new LinkedList<>();
+    public LinkedList<Vector> bullets_v = new LinkedList<>();
+
     int camera_mode = 0;
 
     boolean shooting = false;
 
     public void shoot(){
-        bullet.show();
-        bullet.cd(plane_origin.pos);
-        bullet_v = velocity.add(z_norm.mult(1000));
+        bullets.add(new Flat_Obj(bullet));
+        // bullet.cd(plane_origin.pos);
+        bullets_v.add(velocity.add(z_norm.mult(1000)));
+        // bullet_v = velocity.add(z_norm.mult(1000));
 
-        shooting = true;
+        // shooting = true;
     }
 
     public void epoch(long time){
-        scene.render();
-
         x_norm = plane_origin.x_norm;
         y_norm = plane_origin.y_norm;
         z_norm = plane_origin.z_norm;
@@ -155,9 +155,11 @@ public class Calc implements Runnable {
             camera.rotate(plane.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
             camera.rotate(plane_origin.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
             camera_mode = 0;
+            scene.mount_camera(camera2);
         }
         if(camera_mode != 1 && pressed_keys['2']){
             camera_mode = 1;
+            scene.mount_camera(camera);
         }
 
         if(accelerating || pressed_keys['j']){
@@ -167,16 +169,40 @@ public class Calc implements Runnable {
             velocity = velocity.subtract(z_norm.mult(acc));
         }
 
+        /*
         if(shooting){
+            scene.rasterize(bullet);
             bullet.move(bullet_v);
             if(bullet.pos.subtract(plane_origin.pos).mag > 100000) shooting = false; // 100 meters
         }
         if(!shooting){
-            bullet.hide();
             bullet.cd(plane_origin.pos);
+        }*/
+
+        if(!bullets.isEmpty()){
+            ListIterator<Flat_Obj> instance_it = bullets.listIterator();
+            ListIterator<Vector> velocity_it = bullets_v.listIterator();
+            Flat_Obj bullet_instance;
+            Vector instance_velocity;
+            while(instance_it.hasNext()){
+                bullet_instance = instance_it.next();
+                instance_velocity = velocity_it.next();
+                if(bullet.pos.subtract(plane_origin.pos).mag > 100000){
+                    instance_it.remove();
+                    velocity_it.remove();
+                }
+                scene.rasterize(bullet_instance);
+                bullet_instance.move(instance_velocity);
+            }
         }
 
         move();
+
+        scene.rasterize(plane);
+        scene.rasterize(crosshair);
+        scene.rasterize(cube);
+
+        scene.render();
     }
 
     public void run() {

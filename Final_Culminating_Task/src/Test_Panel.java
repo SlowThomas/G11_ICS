@@ -3,7 +3,6 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
 
-import algebra.Vector;
 import engine.*;
 
 public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
@@ -20,7 +19,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         // NOTE: to be repeated before game starts
         calc = new Calc();
-        // scene = new Scene(800, 450, 10, calc.cameras, calc.objs, calc.flat_objs);
         scene = calc.scene;
 
         Thread calculation = new Thread(calc);
@@ -53,12 +51,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        /*
-        end = System.currentTimeMillis();
-        t = end - start;
-        start = end;
 
-         */
         g.drawImage(scene.canvas, 0, 0, null);
         g.setColor(new Color(255, 255, 255));
         if(calc.camera_mode == 0){
@@ -67,12 +60,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         else if(calc.camera_mode == 1){
             g.drawString("Maneuver Mode", 50, 100);
         }
-        /*
-        if(t > 1E-14)
-            g.drawString((int)(1000.0/t) + " FPS ", 100, 100);
-
-        // g.drawString((int)calc.camera2.pos.at(0) / 100 + ", " + (int)calc.camera2.pos.at(1) / 100 + ", " + (int)calc.camera2.pos.at(2) / 100, 100, 100);
-         */
 
     }
 
@@ -87,10 +74,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         }
     }
 
-    public int frame_counter = 0;
-    public long t = 1;
-    public long start = 0;
-    public long end = 0;
     public void run() {
         while(true){
             try { Thread.sleep(50); }
@@ -152,8 +135,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(calc.dragging){
                 if(calc.camera_mode == 0){
-                    calc.camera.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                    calc.camera2.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera2.rotate(calc.plane.pos, calc.camera2.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
                 }
                 else if(calc.camera_mode == 1){
                     calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
@@ -172,8 +155,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(calc.dragging){
                 if(calc.camera_mode == 0){
-                    calc.camera.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
+                    calc.camera2.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
+                    calc.camera2.rotate(calc.plane.pos, calc.camera2.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
                 }
                 else if(calc.camera_mode == 1){
                     calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
