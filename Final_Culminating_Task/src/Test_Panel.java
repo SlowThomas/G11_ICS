@@ -60,7 +60,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         else if(calc.camera_mode == 1){
             g.drawString("Maneuver Mode", 50, 100);
         }
-
+        g.drawString(calc.fps + " FPS", 10, 20);
     }
 
     public static void main(String[] args){
@@ -84,13 +84,16 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     }
 
     // Input Handling
+
+    public boolean dragging = true;
+
     public void keyPressed(KeyEvent e) {
         if(calc != null){
             if(e.getKeyChar() <= 'z') calc.pressed_keys[e.getKeyChar()] = true;
 
             if(e.getKeyCode() == 16){
                 this.setCursor(Cursor.getDefaultCursor());
-                calc.dragging = false;
+                dragging = false;
             }
         }
     }
@@ -101,7 +104,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             if(e.getKeyCode() == 16){
                 this.setCursor(blankCursor);
                 automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
-                calc.dragging = true;
+                dragging = true;
             }
         }
     }
@@ -128,44 +131,23 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         }
     }
 
-    public void mouseDragged(MouseEvent e) {
-        if(calc != null && calc.dragging) {
-            calc.mouse_dx = e.getX() - getWidth() / 2.0;
-            calc.mouse_dy = e.getY() - getHeight() / 2.0;
 
-            if(calc.dragging){
-                if(calc.camera_mode == 0){
-                    calc.camera2.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera2.rotate(calc.plane.pos, calc.camera2.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
-                }
-                else if(calc.camera_mode == 1){
-                    calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
-                }
-            }
+
+    public void rotate_cam(MouseEvent e){
+        if(calc != null && dragging) {
+            calc.mouse_dx += e.getX() - getWidth() / 2.0;
+            calc.mouse_dy += e.getY() - getHeight() / 2.0;
 
             automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
         }
     }
 
+    public void mouseDragged(MouseEvent e) {
+        rotate_cam(e);
+    }
+
     public void mouseMoved(MouseEvent e) {
-        if(calc != null && calc.dragging) {
-            calc.mouse_dx = e.getX() - getWidth() / 2.0;
-            calc.mouse_dy = e.getY() - getHeight() / 2.0;
-
-            if(calc.dragging){
-                if(calc.camera_mode == 0){
-                    calc.camera2.rotate(calc.plane.pos, calc.plane_origin.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera2.rotate(calc.plane.pos, calc.camera2.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
-                }
-                else if(calc.camera_mode == 1){
-                    calc.camera.rotate(calc.plane.pos, calc.camera.y_norm, (float) (calc.sensitivity * calc.mouse_dx));
-                    calc.camera.rotate(calc.plane.pos, calc.camera.x_norm, (float) (calc.sensitivity * calc.mouse_dy));
-                }
-            }
-
-            automation.mouseMove(getLocationOnScreen().x + getWidth() / 2, getLocationOnScreen().y + getHeight() / 2);
-        }
+        rotate_cam(e);
     }
 
     public void keyTyped(KeyEvent e) {}
