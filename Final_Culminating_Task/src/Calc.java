@@ -171,23 +171,14 @@ public class Calc implements Runnable {
 
         if(pressed_keys['1']){
             camera_mode = 0;
-            // TODO: not working when looking back
-            // camera.rotate(plane_origin.pos, camera.x_norm.cross(x_norm), (float)Math.acos(camera.x_norm.dot(x_norm)));
-            // camera.rotate(plane_origin.pos, camera.y_norm.cross(y_norm), (float)Math.acos(camera.y_norm.dot(y_norm)));
             scene.mount_camera(camera);
         }
         if(pressed_keys['2']){
             camera_mode = 1;
-            // TODO: not working when looking back
-            // camera2.rotate(plane_origin.pos, camera2.x_norm.cross(x_norm), (float)Math.acos(camera2.x_norm.dot(x_norm)));
-            // camera2.rotate(plane_origin.pos, camera2.y_norm.cross(y_norm), (float)Math.acos(camera2.y_norm.dot(y_norm)));
             scene.mount_camera(camera2);
         }
-        if(camera_mode == 0){
-            // camera.rotate(plane_origin.y_norm, (float) (sensitivity * mouse_dx));
-            // camera.rotate(camera.x_norm, (float) (sensitivity * mouse_dy));
-        }
-        else if(camera_mode == 1){
+
+        if(camera_mode == 1){
             camera2.rotate(plane_origin.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
             camera2.rotate(plane_origin.pos, camera2.x_norm, (float) (sensitivity * mouse_dy));
         }
