@@ -9,6 +9,7 @@ public class Calc implements Runnable {
 
     public Real_Obj cube = new Real_Obj("Cube");
     public Real_Obj plane = new Real_Obj("Ship");
+    public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
     public Flat_Obj bullet = new Flat_Obj("Bullet.png");
     public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
@@ -19,8 +20,9 @@ public class Calc implements Runnable {
     public Scene scene;
 
     public Calc(){
-        plane.auto_origin();
+        // plane.auto_origin();
         plane.scale(3);
+        plane_acc.scale(3);
 
         crosshair.scale(0.5);
         bullet.scale(0.5);
@@ -71,21 +73,26 @@ public class Calc implements Runnable {
 
     public float adjust(float n, long time){
         // default for n is unit per 50 millisecond
-        return n * time / 50f;
+        // return n * time / 50f;
+        return n;
     }
 
     public Vector adjust(Vector v, long time){
-        return v.mult(time / 50f);
+        // default for n is unit per 50 millisecond
+        // return v.mult(time / 50f);
+        return v;
     }
 
     public void rotate(Vector axis, float angle){
         plane.rotate(axis, angle);
+        plane_acc.rotate(axis, angle);
         plane_origin.rotate(axis, angle);
         camera.rotate(plane_origin.pos, axis, angle);
     }
 
     public void move(Vector velocity){
         plane.move(velocity);
+        plane_acc.move(velocity);
         camera.move(velocity);
         camera2.move(velocity);
         plane_origin.move(velocity);
@@ -206,8 +213,12 @@ public class Calc implements Runnable {
             }
         }
 
-        if(camera_mode != 0)
-            scene.rasterize(plane);
+        if(camera_mode != 0){
+            if(accelerating)
+                scene.rasterize(plane_acc);
+            else
+                scene.rasterize(plane);
+        }
         scene.rasterize(crosshair);
         scene.rasterize(cube);
 
