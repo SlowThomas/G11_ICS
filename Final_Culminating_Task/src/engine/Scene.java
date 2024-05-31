@@ -132,8 +132,9 @@ public class Scene {
 
             if(z < Consts.distance) return;
 
-            int width = (int)(obj.img.getWidth() * obj.scale * Consts.distance / z);
-            int height = (int)(obj.img.getHeight() * obj.scale * Consts.distance / z);
+            // take 5 as the default resolution
+            int width = (int)(obj.img.getWidth() * obj.scale * resolution / 5 * Consts.distance / z);
+            int height = (int)(obj.img.getHeight() * obj.scale * resolution / 5 * Consts.distance / z);
 
             float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z * resolution;
             float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z * resolution;
@@ -164,8 +165,8 @@ public class Scene {
 
             if(z < Consts.distance) return;
 
-            int width = (int)(obj.img.getWidth() * obj.scale);
-            int height = (int)(obj.img.getHeight() * obj.scale);
+            int width = (int)(obj.img.getWidth() * obj.scale * resolution / 5);
+            int height = (int)(obj.img.getHeight() * obj.scale * resolution / 5);
 
             float x = screen.width / 2.0f + pos.at(0) * Consts.distance / z * resolution;
             float y = screen.height / 2.0f - pos.at(1) * Consts.distance / z * resolution;

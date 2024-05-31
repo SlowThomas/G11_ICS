@@ -24,10 +24,10 @@ public class Calc implements Runnable {
         plane.scale(3);
         plane_acc.scale(3);
 
-        crosshair.scale(0.5);
+        crosshair.scale(0.8);
         bullet.scale(0.5);
 
-        scene = new Scene(800, 450, 2);
+        scene = new Scene(800, 450, 5);
         scene.mount_camera(camera2);
     }
 
