@@ -225,6 +225,8 @@ public class Calc implements Runnable {
         scene.render();
     }
 
+    public int update_time = 50;
+
     public void run() {
         long start = System.currentTimeMillis(), end = start, time;
 
@@ -232,10 +234,10 @@ public class Calc implements Runnable {
             // Aim for 20 Hz update
             time = end - start;
             start = end;
-            if(time <= 50){
-                try { Thread.sleep(50 - time); }
+            if(time <= update_time){
+                try { Thread.sleep(update_time - time); }
                 catch(Exception e){}
-                epoch(50);
+                epoch(update_time);
             }
             else{
                 epoch(time);

@@ -57,10 +57,8 @@ public class Scene {
 
         public static float z_buff(float x, float y, float[][] triangle){
             // barycentric coordinate using the inverses. z_buffer's are linear to each other in terms of their inverses
-            if(Math.abs(triangle[0][2]) < epsilon || Math.abs(triangle[1][2]) < epsilon || Math.abs(triangle[2][2]) < epsilon)
-                return Math.max(triangle[0][2], Math.max(triangle[1][2], triangle[2][2]));
+            // if t is too small, use a linear model instead
             float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
-
             return 1 / Math.max(epsilon, (Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t) / triangle[2][2]
                     + (Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t) / triangle[0][2]
                     + (Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t) / triangle[1][2]);
@@ -83,15 +81,27 @@ public class Scene {
                 vect2[0][0] += Consts.distance * v0.at(0) / z0 * pixel_per_mm;
                 vect2[0][1] -= Consts.distance * v0.at(1) / z0 * pixel_per_mm;
             }
+            else{
+                vect2[0][0] += v0.at(0) / epsilon;
+                vect2[0][1] -= v0.at(1) / epsilon;
+            }
             vect2[0][2] = z0;
             if(z1 > epsilon) {
                 vect2[1][0] += Consts.distance * v1.at(0) / z1 * pixel_per_mm;
                 vect2[1][1] -= Consts.distance * v1.at(1) / z1 * pixel_per_mm;
             }
+            else{
+                vect2[1][0] += v1.at(0) / epsilon;
+                vect2[1][1] -= v1.at(1) / epsilon;
+            }
             vect2[1][2] = z1;
             if(z2 > epsilon) {
                 vect2[2][0] += Consts.distance * v2.at(0) / z2 * pixel_per_mm;
                 vect2[2][1] -= Consts.distance * v2.at(1) / z2 * pixel_per_mm;
+            }
+            else{
+                vect2[2][0] += v2.at(0) / epsilon;
+                vect2[2][1] -= v2.at(1) / epsilon;
             }
             vect2[2][2] = z2;
 
