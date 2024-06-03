@@ -57,7 +57,7 @@ public class Scene {
 
         public static float z_buff(float x, float y, float[][] triangle){
             // barycentric coordinate using the inverses. z_buffer's are linear to each other in terms of their inverses
-            // if t is too small, use a linear model instead
+            // TODO: if t is too small, use a linear model instead
             float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
             return 1 / Math.max(epsilon, (Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t) / triangle[2][2]
                     + (Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t) / triangle[0][2]
