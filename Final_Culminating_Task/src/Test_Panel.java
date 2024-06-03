@@ -10,7 +10,7 @@ import engine.*;
 
 public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
-    public class Calc implements Runnable {
+    public static class Calc implements Runnable {
 
         public Real_Obj cube = new Real_Obj("Cube");
         public Real_Obj plane = new Real_Obj("Ship");
