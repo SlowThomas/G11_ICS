@@ -33,6 +33,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             crosshair.scale(0.8);
             bullet.scale(0.5);
+            enemy.scale(1);
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
@@ -77,6 +78,15 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Vector instance_velocity;
         public Float instance_time;
 
+        public LinkedList<Flat_Obj> enemies = new LinkedList<>();
+        public ListIterator<Flat_Obj> enemy_instance_it;
+        public Flat_Obj enemy_instance;
+        public int enemy_count = 0;
+
+        public int enemy_timer = 0;
+
+        public int score = 0;
+
 
         public float adjust(float n, long time){
             // default for n is unit per 50 millisecond
@@ -114,6 +124,20 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         public void epoch(long time){
             fps = (int)(1000f / time + 0.5);
+
+            // Generate enemy
+            if(enemy_timer <= 0 && enemy_count < 10){
+                enemy_timer = 2000 + 10000 / (score / 10 + 1);
+
+                enemies.add(new Flat_Obj(enemy));
+                enemies.getLast().cd(plane_origin.pos);
+                Vector dir = new Vector(0, 0, 1);
+                // TODO: add x and y rotation matrix
+
+                enemies.getLast().move(dir.mult((float)(Math.random() * 1e5 + 1e4)));
+                enemy_count++;
+            }
+            if(enemy_timer > 0){ enemy_timer -= (int) time;}
 
             if(pressed_keys['l']){
                 cube.scale(zoom);
@@ -216,6 +240,24 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                         bullet_instance_it.remove();
                         bullet_velocity_it.remove();
                         bullet_time_it.remove();
+                    }
+                }
+            }
+
+            if(!enemies.isEmpty()){
+                enemy_instance_it = enemies.listIterator();
+                while(enemy_instance_it.hasNext()){
+                    enemy_instance = enemy_instance_it.next();
+                    scene.rasterize(enemy_instance);
+                    if(!bullets.isEmpty()){
+                        bullet_instance_it = bullets.listIterator();
+                        bullet_velocity_it = bullets_v.listIterator();
+                        while(bullet_instance_it.hasNext()) {
+                            bullet_instance = bullet_instance_it.next();
+                            instance_velocity = bullet_velocity_it.next();
+
+                            // point-line distance detection
+                        }
                     }
                 }
             }
