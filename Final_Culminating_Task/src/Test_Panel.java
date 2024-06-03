@@ -18,6 +18,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Flat_Obj bullet = new Flat_Obj("Bullet.png");
         public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
+        public Flat_Obj enemy = new Flat_Obj("ufo.png");
+
         public Camera camera = new Camera(0, 0, -530);
         public Camera camera2 = new Camera(0, 100, -3000);
         public Camera plane_origin = new Camera(0, 0, 0);
