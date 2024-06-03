@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import algebra.Matrix;
 import algebra.Vector;
 import engine.*;
 
@@ -133,6 +134,17 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 enemies.getLast().cd(plane_origin.pos);
                 Vector dir = new Vector(0, 0, 1);
                 // TODO: add x and y rotation matrix
+                float rx = (float) (2 * Math.PI * Math.random());
+                float ry = (float) (2 * Math.PI * Math.random());
+                float a = (float) Math.cos(rx);
+                float b = (float) Math.sin(rx);
+                float c = (float) Math.cos(ry);
+                float d = (float) Math.sin(ry);
+                dir = new Matrix(new float[][]{
+                        {0, 0, 0},
+                        {-b*d, 0, -b*c},
+                        {a*d, 0, a*c}
+                }).dot(dir);
 
                 enemies.getLast().move(dir.mult((float)(Math.random() * 1e5 + 1e4)));
                 enemy_count++;
