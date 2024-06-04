@@ -191,6 +191,11 @@ public class Real_Obj {
         }).dot(T_model);
     }
 
+    // returns the 3-d version of pos vector — the intended vector to be used
+    public Vector getPos(){
+        return new Vector(pos.at(0), pos.at(1), pos.at(2));
+    }
+
     public void auto_origin(){
         Vector mean = new Vector(0, 0, 0, 0);
         for (Vector vertex : v) mean = mean.add(T_model.dot(vertex));
