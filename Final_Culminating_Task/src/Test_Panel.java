@@ -221,14 +221,16 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(pressed_keys['1']){
                 camera_mode = 0;
-                scene.mount_camera(camera);
             }
             if(pressed_keys['2']){
                 camera_mode = 1;
-                scene.mount_camera(camera2);
             }
 
-            if(camera_mode == 1){
+            if(camera_mode == 0){
+                scene.mount_camera(camera);
+            }
+            else if(camera_mode == 1){
+                scene.mount_camera(camera2);
                 camera2.rotate(plane_origin.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
                 camera2.rotate(plane_origin.pos, camera2.x_norm, (float) (sensitivity * mouse_dy));
             }
