@@ -133,7 +133,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 enemies.add(new Flat_Obj(enemy));
                 enemies.getLast().cd(plane_origin.pos);
                 Vector dir = new Vector(0, 0, 1);
-                // TODO: add x and y rotation matrix
                 float rx = (float) (2 * Math.PI * Math.random());
                 float ry = (float) (2 * Math.PI * Math.random());
                 float a = (float) Math.cos(rx);
