@@ -19,7 +19,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Flat_Obj bullet = new Flat_Obj("Bullet.png");
         public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
-        public Flat_Obj enemy = new Flat_Obj("ufo.png");
+        public Flat_Obj enemy = new Flat_Obj("ghost_red.png");
 
         public Camera camera = new Camera(0, 0, -530);
         public Camera camera2 = new Camera(0, 100, -3000);
@@ -270,10 +270,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                             bullet_instance = bullet_instance_it.next();
                             instance_velocity = bullet_velocity_it.next();
 
-                            // TODO: correct distance
-                            double distance = 1020;
+                            double distance = 140;
                             // point-line distance detection
-                            // Use cross product once to obtain distance
+                            // Use cross product to obtain distance
                             // Use dot product's sign to check position
                             Vector bullet_pos = bullet_instance.getPos(), enemy_pos = enemy_instance.getPos();
                             if(
@@ -296,7 +295,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                     scene.rasterize(plane);
             }
             scene.rasterize(crosshair);
-            scene.rasterize(cube);
+            // scene.rasterize(cube);
 
             scene.render();
         }
