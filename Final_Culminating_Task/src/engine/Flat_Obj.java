@@ -50,6 +50,10 @@ public class Flat_Obj {
         }).dot(pos);
     }
 
+    public Vector getPos(){
+        return new Vector(pos.at(0), pos.at(1), pos.at(2));
+    }
+
     public void cd(Vector destination){
         move(destination.subtract(pos));
     }
