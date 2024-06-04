@@ -58,7 +58,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public float rot_speed_y = 0;
         public float rot_speed_z = 0;
 
-        public float acc = 0.2f;
+        public float acc = 1f;
 
         public boolean accelerating;
         public boolean decelerating;
@@ -139,11 +139,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 float b = (float) Math.sin(rx);
                 float c = (float) Math.cos(ry);
                 float d = (float) Math.sin(ry);
+                /*
                 dir = new Matrix(new float[][]{
                         {0, 0, 0},
                         {-b*d, 0, -b*c},
                         {a*d, 0, a*c}
-                }).dot(dir);
+                }).dot(dir);*/
 
                 enemies.getLast().move(dir.mult((float)(Math.random() * 1e5 + 1e4)));
                 enemy_count++;
@@ -269,8 +270,20 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                             bullet_instance = bullet_instance_it.next();
                             instance_velocity = bullet_velocity_it.next();
 
+                            // TODO: correct distance
+                            double distance = 100;
                             // point-line distance detection
-                            // Use vector projection for distance
+                            // Use cross product once to obtain distance
+                            // Use dot product's sign to check position
+                            Vector bullet_pos = bullet_instance.getPos(), enemy_pos = enemy_instance.getPos();
+                            if(
+                                    bullet_pos.subtract(enemy_pos).cross(instance_velocity).mag <= instance_velocity.mag * distance &&
+                                    ((bullet_pos.subtract(enemy_pos).dot(instance_velocity) > 0) != (bullet_pos.subtract(instance_velocity).subtract(enemy_pos).dot(instance_velocity) > 0))
+                              ){
+                                // destroy the enemy
+                                enemy_instance_it.remove();
+                                break;
+                              }
                         }
                     }
                 }
