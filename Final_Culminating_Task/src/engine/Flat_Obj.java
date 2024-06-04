@@ -55,7 +55,7 @@ public class Flat_Obj {
     }
 
     public void cd(Vector destination){
-        move(destination.subtract(pos));
+        move(destination.subtract(getPos()));
     }
 
     public void scale(double scale){

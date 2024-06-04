@@ -121,7 +121,7 @@ public class Camera {
     }
 
     public void cd(Vector destination){
-        move(destination.subtract(pos));
+        move(destination.subtract(getPos()));
     }
 
 }
