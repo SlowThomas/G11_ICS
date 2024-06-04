@@ -270,6 +270,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                             instance_velocity = bullet_velocity_it.next();
 
                             // point-line distance detection
+                            // Use vector projection for distance
                         }
                     }
                 }
