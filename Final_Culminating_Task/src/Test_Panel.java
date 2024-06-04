@@ -58,7 +58,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public float rot_speed_y = 0;
         public float rot_speed_z = 0;
 
-        public float acc = 1f;
+        public float acc = 2f;
 
         public boolean accelerating;
         public boolean decelerating;
@@ -68,21 +68,25 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Vector y_norm;
         public Vector z_norm;
 
-        public float bullet_life = 5000;
+        public long bullet_life = 5000;
         public LinkedList<Flat_Obj> bullets = new LinkedList<>();
         public LinkedList<Vector> bullets_v = new LinkedList<>();
-        public LinkedList<Float> bullet_time = new LinkedList<>();
+        public LinkedList<Long> bullet_time = new LinkedList<>();
         public ListIterator<Flat_Obj> bullet_instance_it;
         public ListIterator<Vector> bullet_velocity_it;
-        public ListIterator<Float> bullet_time_it;
+        public ListIterator<Long> bullet_time_it;
         public Flat_Obj bullet_instance;
         public Vector instance_velocity;
-        public Float instance_time;
+        public Long instance_time;
 
         public LinkedList<Flat_Obj> enemies = new LinkedList<>();
+        public LinkedList<Long> enemy_fire_countdown = new LinkedList<>();
         public ListIterator<Flat_Obj> enemy_instance_it;
+        public ListIterator<Long> enemy_fire_countdown_it;
         public Flat_Obj enemy_instance;
+        public Long enemy_fire_countdown_instance;
         public int enemy_count = 0;
+        public long enemy_fire_time_delta = 1000;
 
         public int enemy_timer = 0;
 
@@ -147,6 +151,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 }).dot(dir);*/
 
                 enemies.getLast().move(dir.mult((float)(Math.random() * 1e5 + 1e4)));
+                enemy_fire_countdown.add(enemy_fire_time_delta);
                 enemy_count++;
             }
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
@@ -260,8 +265,24 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(!enemies.isEmpty()){
                 enemy_instance_it = enemies.listIterator();
+                enemy_fire_countdown_it = enemy_fire_countdown.listIterator();
                 while(enemy_instance_it.hasNext()){
                     enemy_instance = enemy_instance_it.next();
+                    enemy_fire_countdown_instance = enemy_fire_countdown_it.next();
+
+                    if(enemy_fire_countdown_instance <= 0){
+                        enemy_fire_countdown_instance = enemy_fire_time_delta;
+                        Vector enemy_bullet_v = plane_origin.getPos().subtract(enemy_instance.getPos());
+                        for(int i = 0; i < 5; i++){
+                            bullets.add(new Flat_Obj(bullet));
+                            bullets.getLast().cd(enemy_instance.getPos());
+                            Vector this_bullet_v = enemy_bullet_v.add(velocity.mult((float)Math.random() * 10)).mult(1000);
+
+                            bullets_v.add(this_bullet_v);
+                        }
+                    }
+                    enemy_fire_countdown_it.set(enemy_fire_countdown_instance - time);
+
                     scene.rasterize(enemy_instance);
                     if(!bullets.isEmpty()){
                         bullet_instance_it = bullets.listIterator();
