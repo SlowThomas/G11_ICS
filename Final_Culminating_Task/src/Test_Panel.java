@@ -91,14 +91,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         public float adjust(float n, long time){
             // default for n is unit per 50 millisecond
-            // return n * time / 50f;
-            return n;
+            return n * time / 50f;
+            // return n;
         }
 
         public Vector adjust(Vector v, long time){
             // default for n is unit per 50 millisecond
-            // return v.mult(time / 50f);
-            return v;
+            return v.mult(time / 50f);
+            // return v;
         }
 
         public void rotate(Vector axis, float angle){
@@ -271,7 +271,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                             instance_velocity = bullet_velocity_it.next();
 
                             // TODO: correct distance
-                            double distance = 100;
+                            double distance = 1020;
                             // point-line distance detection
                             // Use cross product once to obtain distance
                             // Use dot product's sign to check position
