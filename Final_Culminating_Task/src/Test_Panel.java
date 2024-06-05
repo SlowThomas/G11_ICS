@@ -16,10 +16,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Real_Obj cube = new Real_Obj("Cube");
         public Real_Obj plane = new Real_Obj("Ship");
         public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
-        public Flat_Obj bullet = new Flat_Obj("Bullet.png");
         public Label_Obj crosshair = new Label_Obj("crosshair.png");
-
-        public Flat_Obj enemy = new Flat_Obj("ghost_red.png");
 
         public Camera camera = new Camera(0, 0, -530);
         public Camera camera2 = new Camera(0, 100, -3000);
@@ -28,13 +25,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Scene scene;
 
         public Calc(){
-            // plane.auto_origin();
             plane.scale(3);
             plane_acc.scale(3);
 
             crosshair.scale(0.8);
-            bullet.scale(0.5);
-            enemy.scale(1);
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
@@ -68,29 +62,81 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Vector y_norm;
         public Vector z_norm;
 
-        public long bullet_life = 5000;
-        public LinkedList<Flat_Obj> bullets = new LinkedList<>();
-        public LinkedList<Vector> bullets_v = new LinkedList<>();
-        public LinkedList<Long> bullet_time = new LinkedList<>();
-        public ListIterator<Flat_Obj> bullet_instance_it;
-        public ListIterator<Vector> bullet_velocity_it;
-        public ListIterator<Long> bullet_time_it;
-        public Flat_Obj bullet_instance;
-        public Vector instance_velocity;
-        public Long instance_time;
+        public static class Bullet{
+            public Flat_Obj obj = new Flat_Obj("Bullet.png");
+            public Vector pos;
+            public Vector velocity;
+            public long time = 5000; // bullet life
 
-        public LinkedList<Flat_Obj> enemies = new LinkedList<>();
-        public LinkedList<Long> enemy_fire_countdown = new LinkedList<>();
-        public ListIterator<Flat_Obj> enemy_instance_it;
-        public ListIterator<Long> enemy_fire_countdown_it;
-        public Flat_Obj enemy_instance;
-        public Long enemy_fire_countdown_instance;
-        public int enemy_count = 0;
-        public long enemy_fire_time_delta = 1000;
+            public Bullet(Vector pos, Vector velocity){
+                obj.scale(0.5);
+                obj.cd(pos);
+                this.pos = pos;
+                this.velocity = velocity;
+            }
+
+            public void update(long delta){
+                time -= delta;
+                obj.move(velocity.mult(delta / 50f));
+                pos = obj.getPos();
+            }
+        }
+
+        public static class Enemy_Bullet{
+            public Flat_Obj obj = new Flat_Obj("purple_lightning.png");
+            public Vector pos;
+            public Vector velocity;
+            public long time = 50000; // bullet life
+
+            public Enemy_Bullet(Vector pos, Vector velocity){
+                obj.scale(2);
+                obj.cd(pos);
+                this.pos = pos;
+                this.velocity = velocity;
+            }
+
+            public void update(long delta){
+                time -= delta;
+                obj.move(velocity.mult(delta / 50f));
+                pos = obj.getPos();
+            }
+        }
+
+        public static class Enemy{
+            public Flat_Obj obj = new Flat_Obj("ghost_red.png");
+            public Vector pos;
+            public long fire_time_delta = 7000;
+            public long fire_countdown = fire_time_delta;
+
+            public Enemy(Vector pos){
+                obj.cd(pos);
+                this.pos = obj.getPos();
+            }
+
+            public void update(long delta){
+                fire_countdown -= delta;
+            }
+        }
+
+        public LinkedList<Bullet> bullets = new LinkedList<>();
+        public ListIterator<Bullet> bullet_it;
+        public Bullet bullet;
+
+        public LinkedList<Enemy> enemies = new LinkedList<>();
+        public ListIterator<Enemy> enemy_it;
+        public Enemy enemy;
+
+        public LinkedList<Enemy_Bullet> enemy_bullets = new LinkedList<>();
+        public ListIterator<Enemy_Bullet> enemy_bullet_it;
+        public Enemy_Bullet enemy_bullet;
 
         public int enemy_timer = 0;
 
+        public int invincible_timer = 0;
+        public int invincible_time = 5000;
+
         public int score = 0;
+        public int life = 3;
 
 
         public float adjust(float n, long time){
@@ -109,7 +155,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             plane.rotate(axis, angle);
             plane_acc.rotate(axis, angle);
             plane_origin.rotate(axis, angle);
-            camera.rotate(plane_origin.pos, axis, angle);
+            camera.rotate(plane_origin.getPos(), axis, angle);
         }
 
         public void move(Vector velocity){
@@ -118,24 +164,20 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             camera.move(velocity);
             camera2.move(velocity);
             plane_origin.move(velocity);
-            bullet.move(velocity);
         }
 
         public void shoot(){
-            bullets.add(new Flat_Obj(bullet));
-            bullets_v.add(velocity.add(z_norm.mult(1000)));
-            bullet_time.add(bullet_life);
+            bullets.add(new Bullet(plane_origin.getPos(), velocity.add(z_norm.mult(1000))));
         }
 
         public void epoch(long time){
             fps = (int)(1000f / time + 0.5);
 
             // Generate enemy
-            if(enemy_timer <= 0 && enemy_count < 10){
+            if(enemy_timer <= 0 && enemies.size() < 3){
                 enemy_timer = 2000 + 10000 / (score / 10 + 1);
 
-                enemies.add(new Flat_Obj(enemy));
-                enemies.getLast().cd(plane_origin.pos);
+                // TODO: one-liner randomization
                 Vector dir = new Vector(0, 0, 1);
                 float rx = (float) (2 * Math.PI * Math.random());
                 float ry = (float) (2 * Math.PI * Math.random());
@@ -143,16 +185,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 float b = (float) Math.sin(rx);
                 float c = (float) Math.cos(ry);
                 float d = (float) Math.sin(ry);
-                /*
                 dir = new Matrix(new float[][]{
                         {0, 0, 0},
                         {-b*d, 0, -b*c},
                         {a*d, 0, a*c}
-                }).dot(dir);*/
+                }).dot(dir);
 
-                enemies.getLast().move(dir.mult((float)(Math.random() * 1e5 + 1e4)));
-                enemy_fire_countdown.add(enemy_fire_time_delta);
-                enemy_count++;
+                dir = dir.mult((float)(Math.random() * 1e5 + 1e4));
+                enemies.add(new Enemy(plane_origin.getPos().add(dir)));
             }
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
 
@@ -168,8 +208,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             x_norm = plane_origin.x_norm;
             y_norm = plane_origin.y_norm;
             z_norm = plane_origin.z_norm;
-            crosshair.cd(plane.pos);
-            crosshair.move(z_norm.mult(50000f)); // 500 meters
+            crosshair.cd(plane.getPos());
+            crosshair.move(z_norm.mult(5000f)); // 50 meters
 
 
             if(camera_mode == 0){
@@ -236,78 +276,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             }
             else if(camera_mode == 1){
                 scene.mount_camera(camera2);
-                camera2.rotate(plane_origin.pos, camera2.y_norm, (float) (sensitivity * mouse_dx));
-                camera2.rotate(plane_origin.pos, camera2.x_norm, (float) (sensitivity * mouse_dy));
+                camera2.rotate(plane_origin.getPos(), camera2.y_norm, (float) (sensitivity * mouse_dx));
+                camera2.rotate(plane_origin.getPos(), camera2.x_norm, (float) (sensitivity * mouse_dy));
             }
             mouse_dx = 0;
             mouse_dy = 0;
 
             if(pressed_keys[' '] || pressed_keys['k']) shoot();
 
-            if(!bullets.isEmpty()){
-                bullet_instance_it = bullets.listIterator();
-                bullet_velocity_it = bullets_v.listIterator();
-                bullet_time_it = bullet_time.listIterator();
-                while(bullet_instance_it.hasNext()){
-                    bullet_instance = bullet_instance_it.next();
-                    instance_velocity = bullet_velocity_it.next();
-                    instance_time = bullet_time_it.next();
-                    scene.rasterize(bullet_instance);
-                    bullet_instance.move(adjust(instance_velocity, time));
-                    bullet_time_it.set(instance_time - time);
-                    if(instance_time <= 0){
-                        bullet_instance_it.remove();
-                        bullet_velocity_it.remove();
-                        bullet_time_it.remove();
-                    }
-                }
-            }
-
-            if(!enemies.isEmpty()){
-                enemy_instance_it = enemies.listIterator();
-                enemy_fire_countdown_it = enemy_fire_countdown.listIterator();
-                while(enemy_instance_it.hasNext()){
-                    enemy_instance = enemy_instance_it.next();
-                    enemy_fire_countdown_instance = enemy_fire_countdown_it.next();
-
-                    if(enemy_fire_countdown_instance <= 0){
-                        enemy_fire_countdown_instance = enemy_fire_time_delta;
-                        Vector enemy_bullet_v = plane_origin.getPos().subtract(enemy_instance.getPos());
-                        for(int i = 0; i < 5; i++){
-                            bullets.add(new Flat_Obj(bullet));
-                            bullets.getLast().cd(enemy_instance.getPos());
-                            Vector this_bullet_v = enemy_bullet_v.add(velocity.mult((float)Math.random() * 10)).mult(1000);
-
-                            bullets_v.add(this_bullet_v);
-                        }
-                    }
-                    enemy_fire_countdown_it.set(enemy_fire_countdown_instance - time);
-
-                    scene.rasterize(enemy_instance);
-                    if(!bullets.isEmpty()){
-                        bullet_instance_it = bullets.listIterator();
-                        bullet_velocity_it = bullets_v.listIterator();
-                        while(bullet_instance_it.hasNext()) {
-                            bullet_instance = bullet_instance_it.next();
-                            instance_velocity = bullet_velocity_it.next();
-
-                            double distance = 140;
-                            // point-line distance detection
-                            // Use cross product to obtain distance
-                            // Use dot product's sign to check position
-                            Vector bullet_pos = bullet_instance.getPos(), enemy_pos = enemy_instance.getPos();
-                            if(
-                                    bullet_pos.subtract(enemy_pos).cross(instance_velocity).mag <= instance_velocity.mag * distance &&
-                                    ((bullet_pos.subtract(enemy_pos).dot(instance_velocity) > 0) != (bullet_pos.subtract(instance_velocity).subtract(enemy_pos).dot(instance_velocity) > 0))
-                              ){
-                                // destroy the enemy
-                                enemy_instance_it.remove();
-                                break;
-                              }
-                        }
-                    }
-                }
-            }
 
             if(camera_mode != 0){
                 if(accelerating)
@@ -317,6 +293,77 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             }
             scene.rasterize(crosshair);
             // scene.rasterize(cube);
+
+            if(!bullets.isEmpty()){
+                bullet_it = bullets.listIterator();
+                while(bullet_it.hasNext()){
+                    bullet = bullet_it.next();
+                    if(bullet.time <= 0) {
+                        bullet_it.remove();
+                        continue;
+                    }
+                    bullet.update(time);
+                    scene.rasterize(bullet.obj);
+                }
+            }
+
+            if(!enemies.isEmpty()){
+                enemy_it = enemies.listIterator();
+                while(enemy_it.hasNext()){
+                    enemy = enemy_it.next();
+                    if(enemy.fire_countdown <= 0){
+                        enemy.fire_countdown = enemy.fire_time_delta;
+                        Vector enemy_bullet_v = plane_origin.getPos().subtract(enemy.pos);
+                        for(int i = 0; i < 3; i++){
+                            Vector this_bullet_v = enemy_bullet_v.add(velocity.mult((float)Math.random() * 1000));
+                            if(this_bullet_v.mag < 1e-11) enemy_bullets.add(new Enemy_Bullet(enemy.pos, this_bullet_v));
+                            else enemy_bullets.add(new Enemy_Bullet(enemy.pos, this_bullet_v.mult(100 / this_bullet_v.mag)));
+                        }
+                    }
+                    enemy.update(time);
+                    scene.rasterize(enemy.obj);
+                    if(!bullets.isEmpty()){
+                        bullet_it = bullets.listIterator();
+                        while(bullet_it.hasNext()) {
+                            bullet = bullet_it.next();
+                            double distance = 140;
+                            if(
+                                    bullet.pos.subtract(enemy.pos).cross(bullet.velocity).mag <= bullet.velocity.mag * distance &&
+                                    ((bullet.pos.subtract(enemy.pos).dot(bullet.velocity) > 0) != (bullet.pos.subtract(bullet.velocity).subtract(enemy.pos).dot(bullet.velocity) > 0))
+                              ){
+                                    enemy_it.remove();
+                                    score++;
+                                    break;
+                              }
+                        }
+                    }
+                }
+            }
+
+            if(!enemy_bullets.isEmpty()){
+                enemy_bullet_it = enemy_bullets.listIterator();
+                while(enemy_bullet_it.hasNext()){
+                    enemy_bullet = enemy_bullet_it.next();
+                    double distance = 140;
+                    if(
+                            invincible_timer == 0 &&
+                            enemy_bullet.pos.subtract(plane_origin.getPos()).cross(enemy_bullet.velocity).mag <= enemy_bullet.velocity.mag * distance &&
+                                    ((enemy_bullet.pos.subtract(plane_origin.getPos()).dot(enemy_bullet.velocity) > 0) != (enemy_bullet.pos.subtract(enemy_bullet.velocity).subtract(plane_origin.getPos()).dot(enemy_bullet.velocity) > 0))
+                    ){
+                        life--;
+                        invincible_timer = invincible_time;
+                    }
+                    invincible_timer -= time;
+                    invincible_timer = Math.max(0, invincible_timer);
+
+                    if(enemy_bullet.time <= 0){
+                        enemy_bullet_it.remove();
+                        continue;
+                    }
+                    enemy_bullet.update(time);
+                    scene.rasterize(enemy_bullet.obj);
+                }
+            }
 
             scene.render();
         }
@@ -397,6 +444,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             g.drawString("Maneuver Mode", 50, 100);
         }
         g.drawString(calc.fps + " FPS", 10, 20);
+        g.drawString("score: " + calc.score, 10, 50);
+        g.drawString("life: " + calc.life, 10, 70);
     }
 
     public static void main(String[] args){

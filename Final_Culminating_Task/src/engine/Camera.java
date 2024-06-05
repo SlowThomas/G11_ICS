@@ -26,7 +26,7 @@ public class Camera {
     }); // inverse of T for back-tracking
 
     public Camera(Vector pos){ cd(pos); }
-    public Camera(float x, float y, float z){ this(new Vector(x, y, z, 1)); }
+    public Camera(float x, float y, float z){ this(new Vector(x, y, z)); }
 
     public void rotate(Vector axis, float angle){
         if(axis.mag < Consts.epsilon) return;
