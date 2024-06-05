@@ -9,16 +9,24 @@ import java.awt.image.*;
 
 public class Test{
 
-    public static void main(String[] args) throws IOException{
-        BufferedImage img = ImageIO.read(new File("img/crosshair.png"));
-        for(int i = 0; i < img.getWidth(); i++){
-            for(int j = 0; j < img.getHeight(); j++){
-                int color = img.getRGB(i, j);
-                System.out.printf("%d %d %d %d\n", color >>> 24, (color >> 16) - (color >> 24 << 8),
-                        (color >> 8) - (color >> 16 << 8), color - (color >> 8 << 8));
-            }
+    public static class A implements Runnable{
+        public String str = "hello";
+        public void f(String t){
+            str = t;
         }
 
-        System.out.println();
+        public void run(){
+            System.out.println(str);
+        }
+    }
+
+    public static void main(String[] args) throws IOException{
+        A a = new A();
+        A b = new A();
+        a.f("a"); b.f("b");
+        Thread t = new Thread(a);
+        t.start();
+        t = new Thread(b);
+        t.start();
     }
 }

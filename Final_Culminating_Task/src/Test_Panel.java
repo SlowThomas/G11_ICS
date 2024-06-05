@@ -13,6 +13,17 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public static class Calc implements Runnable {
 
+        public Flat_Obj[] star_sky;
+
+        public void generate_star_sky(){
+            star_sky = new Flat_Obj[1000];
+            for(int i = 0; i < 1000; i++){
+                star_sky[i] = new Flat_Obj("bullet.png");
+                star_sky[i].cd(new Vector((float)(Math.random() * 1e7), (float)(Math.random() * 1e7), (float)(Math.random() * 1e7)));
+                star_sky[i].scale(100);
+            }
+        }
+
         public Real_Obj cube = new Real_Obj("Cube");
         public Real_Obj plane = new Real_Obj("Ship");
         public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
