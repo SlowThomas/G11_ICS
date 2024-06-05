@@ -469,9 +469,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         frame.add(panel);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        while(true){
-            frame.pack();
-        }
+        frame.pack();
     }
 
     public void run() {
