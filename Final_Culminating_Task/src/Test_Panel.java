@@ -45,6 +45,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public double mouse_dx;
         public double mouse_dy;
         public boolean[] pressed_keys = new boolean['z' + 1];
+        public boolean mouse_left_down = false;
+        public boolean mouse_right_down = false;
 
         public float rot_speed_max;
         public float rot_acc;
@@ -254,8 +256,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             rotate(y_norm, adjust(rot_speed_y, time));
             rotate(z_norm, adjust(rot_speed_z, time));
 
+            accelerating = mouse_left_down || pressed_keys['j'];
+            decelerating = mouse_right_down;
 
-            if(accelerating || pressed_keys['j']){
+            if(accelerating){
                 velocity = velocity.add(z_norm.mult(adjust(acc, time)));
             }
             if(decelerating){
@@ -432,6 +436,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         thread.start();
     }
 
+    public int last_score = 0;
+    public long notification_countdown = 0;
+
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
@@ -446,6 +453,14 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         g.drawString(calc.fps + " FPS", 10, 20);
         g.drawString("score: " + calc.score, 10, 50);
         g.drawString("life: " + calc.life, 10, 70);
+
+        if(calc.score != last_score) notification_countdown = 60;
+        if(notification_countdown > 0){
+            g.setColor(new Color(255, 0, 0));
+            g.drawString("Eliminated", 350, 70);
+            notification_countdown--;
+        }
+        last_score = calc.score;
     }
 
     public static void main(String[] args){
@@ -497,10 +512,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public void mousePressed(MouseEvent e) {
         if(calc != null){
             if(e.getButton() == 1){
-                calc.accelerating = true;
+                calc.mouse_left_down = true;
             }
             if(e.getButton() == 3){
-                calc.decelerating = true;
+                calc.mouse_right_down = true;
             }
         }
     }
@@ -508,10 +523,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
     public void mouseReleased(MouseEvent e) {
         if(calc != null){
             if(e.getButton() == 1){
-                calc.accelerating = false;
+                calc.mouse_left_down = false;
             }
             if(e.getButton() == 3){
-                calc.decelerating = false;
+                calc.mouse_right_down = false;
             }
         }
     }
