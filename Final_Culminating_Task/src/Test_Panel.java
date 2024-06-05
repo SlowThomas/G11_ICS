@@ -86,7 +86,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             public Flat_Obj obj = new Flat_Obj("purple_lightning.png");
             public Vector pos;
             public Vector velocity;
-            public long time = 50000; // bullet life
+            public long time = 10000; // bullet life
 
             public Enemy_Bullet(Vector pos, Vector velocity){
                 obj.scale(2);
@@ -185,13 +185,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 float b = (float) Math.sin(rx);
                 float c = (float) Math.cos(ry);
                 float d = (float) Math.sin(ry);
-                dir = new Matrix(new float[][]{
+                /*dir = new Matrix(new float[][]{
                         {0, 0, 0},
                         {-b*d, 0, -b*c},
                         {a*d, 0, a*c}
-                }).dot(dir);
+                }).dot(dir);*/
 
-                dir = dir.mult((float)(Math.random() * 1e5 + 1e4));
+                dir = dir.mult((float)(Math.random() * 1e2 + 1e4));
                 enemies.add(new Enemy(plane_origin.getPos().add(dir)));
             }
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
@@ -209,7 +209,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             y_norm = plane_origin.y_norm;
             z_norm = plane_origin.z_norm;
             crosshair.cd(plane.getPos());
-            crosshair.move(z_norm.mult(5000f)); // 50 meters
+            crosshair.move(z_norm.mult(10000f)); // 100 meters
 
 
             if(camera_mode == 0){
