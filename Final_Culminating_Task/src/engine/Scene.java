@@ -200,6 +200,51 @@ public class Scene {
         }
     }
 
+    public void rasterize_bg(){
+        BufferedImage img = new BufferedImage(800, 450, BufferedImage.TYPE_INT_RGB);
+
+        // use arctan applied on the z-norm of the camera to figure out the map position
+        double x, y;
+        if(Math.abs(camera.z_norm.at(2)) > Consts.epsilon){
+            x = Math.abs(Math.atan(camera.z_norm.at(0) / camera.z_norm.at(2)));
+            y = Math.abs(Math.atan(camera.z_norm.at(1) / camera.z_norm.at(2)));
+        }
+        else{
+            x = Math.PI / 2;
+            y = Math.PI / 2;
+        }
+        if(camera.z_norm.at(0) < 0){
+            if(camera.z_norm.at(2) < 0){
+                x -= Math.PI;
+            }
+            else{
+                x = -x;
+            }
+        }
+        else if(camera.z_norm.at(2) < 0){
+            x = Math.PI - x;
+        }
+        if(camera.z_norm.at(1) < 0){
+            if(camera.z_norm.at(2) < 0){
+                y -= Math.PI;
+            }
+            else{
+                y = -y;
+            }
+        }
+        else if(camera.z_norm.at(2) < 0){
+            y = Math.PI - y;
+        }
+
+        int i = (int)((x / 2 / Math.PI + 0.5) * img.getWidth());
+        int j = (int)((y / 2 / Math.PI + 0.5) * img.getHeight());
+        i = Math.max(Math.min(i, img.getWidth() - 1), 0);
+        j = Math.max(Math.min(j, img.getHeight() - 1), 0);
+
+        int range_x = (int)(Math.atan(Math.abs(screen.width / Consts.distance / 2)) / Math.PI * img.getWidth()); // from left to right
+        int range_y = (int)(Math.atan(Math.abs(screen.height / Consts.distance / 2)) / Math.PI * img.getHeight()); // from top to bottom
+    }
+
     private Camera camera;
 
     private Screen screen;
