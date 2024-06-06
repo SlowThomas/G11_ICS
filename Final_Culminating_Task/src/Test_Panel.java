@@ -12,28 +12,6 @@ import engine.*;
 public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
     public static class Calc implements Runnable {
-
-        public Vector[] star_sky;
-        public float star_distance = 1e9f;
-
-        public void generate_star_sky(){
-            star_sky = new Vector[100];
-            for(int i = 0; i < star_sky.length; i++){
-                double alpha = Math.random() * 2 * Math.PI;
-                double beta = Math.random() * 2 * Math.PI;
-                float s1 = (float)(Math.sin(alpha));
-                float c1 = (float)(Math.cos(alpha));
-                float s2 = (float)(Math.sin(beta));
-                float c2 = (float)(Math.cos(beta));
-
-                star_sky[i] = new Matrix(new float[][]{
-                        {0, -s1*s2, -s1*c2},
-                        {0, 0, 0},
-                        {0, c1*s2, c1*c2}
-                }).dot(new Vector(0, 0, star_distance));
-            }
-        }
-
         public Real_Obj cube = new Real_Obj("Cube");
         public Real_Obj plane = new Real_Obj("Ship");
         public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
@@ -208,6 +186,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 float b = (float) Math.sin(rx);
                 float c = (float) Math.cos(ry);
                 float d = (float) Math.sin(ry);
+                // TODO: correct matrix
                 /*dir = new Matrix(new float[][]{
                         {0, 0, 0},
                         {-b*d, 0, -b*c},
