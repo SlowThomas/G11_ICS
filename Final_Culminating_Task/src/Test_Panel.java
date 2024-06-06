@@ -13,14 +13,24 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
     public static class Calc implements Runnable {
 
-        public Flat_Obj[] star_sky;
+        public Vector[] star_sky;
+        public float star_distance = 1e9f;
 
         public void generate_star_sky(){
-            star_sky = new Flat_Obj[1000];
-            for(int i = 0; i < 1000; i++){
-                star_sky[i] = new Flat_Obj("bullet.png");
-                star_sky[i].cd(new Vector((float)(Math.random() * 1e7), (float)(Math.random() * 1e7), (float)(Math.random() * 1e7)));
-                star_sky[i].scale(100);
+            star_sky = new Vector[100];
+            for(int i = 0; i < star_sky.length; i++){
+                double alpha = Math.random() * 2 * Math.PI;
+                double beta = Math.random() * 2 * Math.PI;
+                float s1 = (float)(Math.sin(alpha));
+                float c1 = (float)(Math.cos(alpha));
+                float s2 = (float)(Math.sin(beta));
+                float c2 = (float)(Math.cos(beta));
+
+                star_sky[i] = new Matrix(new float[][]{
+                        {0, -s1*s2, -s1*c2},
+                        {0, 0, 0},
+                        {0, c1*s2, c1*c2}
+                }).dot(new Vector(0, 0, star_distance));
             }
         }
 
