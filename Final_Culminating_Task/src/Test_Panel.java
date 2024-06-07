@@ -1,7 +1,9 @@
 import java.awt.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -17,6 +19,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
         public Label_Obj crosshair = new Label_Obj("crosshair.png");
 
+        public BufferedImage bg_img;
+
         public Camera camera = new Camera(0, 0, -530);
         public Camera camera2 = new Camera(0, 100, -3000);
         public Camera plane_origin = new Camera(0, 0, 0);
@@ -31,6 +35,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
+
+            try{
+                bg_img = ImageIO.read(new File("star_sky.jpg"));
+            }
+            catch(Exception e){}
+
+            scene.mount_background(bg_img);
         }
 
         public int fps = 0;
@@ -369,6 +380,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 }
             }
 
+            scene.rasterize_bg();
             scene.render();
         }
 

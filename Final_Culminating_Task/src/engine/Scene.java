@@ -200,55 +200,85 @@ public class Scene {
         }
     }
 
-    public void rasterize_bg(){
-        BufferedImage img = new BufferedImage(800, 450, BufferedImage.TYPE_INT_RGB);
-
-        // use arctan applied on the z-norm of the camera to figure out the map position
+    public double[] get_angles(Vector v){
         double x, y;
-        if(Math.abs(camera.z_norm.at(2)) > Consts.epsilon){
-            x = Math.abs(Math.atan(camera.z_norm.at(0) / camera.z_norm.at(2)));
-            y = Math.abs(Math.atan(camera.z_norm.at(1) / camera.z_norm.at(2)));
+        if(Math.abs(v.at(2)) > Consts.epsilon){
+            x = Math.abs(Math.atan(v.at(0) / v.at(2)));
+            y = Math.abs(Math.atan(v.at(1) / v.at(2)));
         }
         else{
             x = Math.PI / 2;
             y = Math.PI / 2;
         }
-        if(camera.z_norm.at(0) < 0){
-            if(camera.z_norm.at(2) < 0){
+        if(v.at(0) < 0){
+            if(v.at(2) < 0){
                 x -= Math.PI;
             }
             else{
                 x = -x;
             }
         }
-        else if(camera.z_norm.at(2) < 0){
+        else if(v.at(2) < 0){
             x = Math.PI - x;
         }
-        if(camera.z_norm.at(1) < 0){
-            if(camera.z_norm.at(2) < 0){
+        if(v.at(1) < 0){
+            if(v.at(2) < 0){
                 y -= Math.PI;
             }
             else{
                 y = -y;
             }
         }
-        else if(camera.z_norm.at(2) < 0){
+        else if(v.at(2) < 0){
             y = Math.PI - y;
         }
+        return new double[]{x, y};
+    }
 
-        int i = (int)((x / 2 / Math.PI + 0.5) * img.getWidth());
-        int j = (int)((y / 2 / Math.PI + 0.5) * img.getHeight());
-        i = Math.max(Math.min(i, img.getWidth() - 1), 0);
-        j = Math.max(Math.min(j, img.getHeight() - 1), 0);
+    public void rasterize_bg(){
+        BufferedImage img = bg_img;
+        if(img == null) return;
+        double[] angles;
 
-        int range_x = (int)(Math.atan(Math.abs(screen.width / Consts.distance / 2)) / Math.PI * img.getWidth()); // from left to right
-        int range_y = (int)(Math.atan(Math.abs(screen.height / Consts.distance / 2)) / Math.PI * img.getHeight()); // from top to bottom
-        // TODO: project the four vertices of the screen separately.
+        angles = get_angles(camera.z_norm);
+
+        int[] mid = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
+
+        // use top / right position
+        // Slant vector to the top = h * y_norm + d * z_norm
+
+        Vector r_slant = camera.x_norm.mult(screen.width).add(camera.z_norm.mult(Consts.distance * resolution));
+        angles = get_angles(r_slant);
+        int[] right = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
+        Vector t_slant = camera.y_norm.mult(screen.height).add(camera.z_norm.mult(Consts.distance * resolution));
+        angles = get_angles(t_slant);
+        int[] top = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
+
+        int[] tr = {top[0] + right[0] - mid[0], top[1] + right[1] - mid[1]};
+        int[] tl = {top[0] - right[0] + mid[0], top[1] - right[1] + mid[1]};
+        int[] br = {-top[0] + right[0] + mid[0], -top[1] + right[1] + mid[1]};
+        double[] ri = {tr[0] - tl[0], tr[1] - tl[1]};
+        double[] rj = {br[0] - tr[0], br[1] - tr[1]};
+
+        double mag_ri = Math.sqrt(ri[0] * ri[0] + ri[1] * ri[1]);
+        double mag_rj = Math.sqrt(rj[0] * rj[0] + rj[1] * rj[1]);
+
+        ri[0] /= mag_ri; ri[1] /= mag_ri;
+        rj[0] /= mag_rj; rj[1] /= mag_rj;
+
+        for(int i = 0; i < screen.width; i++){
+            for(int j = 0; j < screen.height; j++){
+                if(screen.z_buffed[i][j]) continue;
+                screen.colo[i][j] = img.getRGB(((int)(tl[0] + i * ri[0] + j * rj[0]) + img.getWidth()) % img.getWidth(), ((int)(tl[1] + i * ri[1] + j * rj[1]) + img.getHeight()) % img.getHeight());
+            }
+        }
     }
 
     private Camera camera;
 
     private Screen screen;
+
+    public BufferedImage bg_img;
 
     private int width;
     private int height;
@@ -267,6 +297,10 @@ public class Scene {
 
     public void mount_camera(Camera camera){
         this.camera = camera;
+    }
+
+    public void mount_background(BufferedImage img){
+        bg_img = img;
     }
 
     public void rasterize(Real_Obj obj){
