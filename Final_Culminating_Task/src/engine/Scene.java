@@ -243,6 +243,7 @@ public class Scene {
 
         int range_x = (int)(Math.atan(Math.abs(screen.width / Consts.distance / 2)) / Math.PI * img.getWidth()); // from left to right
         int range_y = (int)(Math.atan(Math.abs(screen.height / Consts.distance / 2)) / Math.PI * img.getHeight()); // from top to bottom
+        // TODO: project the four vertices of the screen separately.
     }
 
     private Camera camera;
