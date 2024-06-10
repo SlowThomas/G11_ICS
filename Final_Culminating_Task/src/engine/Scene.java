@@ -235,6 +235,36 @@ public class Scene {
         return new double[]{x, y};
     }
 
+    private void fisheye_bg(){
+        int m_width = bg_img.getWidth() / 2;
+        int m_height = bg_img.getHeight() / 2;
+
+        // TODO: change image limit
+        int r = Math.min(m_width, m_height);
+
+        for(int i = 0; i < screen.width; i++){
+            for(int j = 0; j < screen.height; j++){
+                if(screen.z_buffed[i][j]) continue;
+                Vector pixel_v = camera.z_norm.mult(Consts.distance).add(camera.x_norm.mult((float)((i - screen.width / 2.0) * resolution))).add(camera.y_norm.mult((float)((screen.height / 2.0 - j) * resolution)));
+                double x = pixel_v.at(0), y = pixel_v.at(1), z = pixel_v.at(2);
+                double alpha;
+                if(Math.abs(x) < Consts.epsilon) alpha = Math.PI / 2;
+                else alpha = Math.abs(Math.atan(y / x));
+
+                double xz_mag = Math.sqrt(x * x + z * z);
+                if(xz_mag < Consts.epsilon){
+                    screen.colo[i][j] = bg_img.getRGB(m_width, m_height);
+                    continue;
+                }
+                double walk = r * (1 - 2 / Math.PI * alpha);
+
+                screen.colo[i][j] = bg_img.getRGB(
+                        (int)(m_width + x / xz_mag * walk),
+                        (int)(m_height + z / xz_mag * walk));
+            }
+        }
+    }
+
     public void rasterize_bg(){
         BufferedImage img = bg_img;
         if(img == null) return;
@@ -317,6 +347,7 @@ public class Scene {
 
     public void render(){
         // TODO: SSAA with ImgFunc.adjustedColor()
+        fisheye_bg();
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
                 canvas.setRGB(x, y, screen.colo[x * screen.width / width][y * screen.height / height]);

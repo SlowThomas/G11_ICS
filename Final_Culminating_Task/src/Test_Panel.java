@@ -14,30 +14,38 @@ import engine.*;
 public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
     public static class Calc implements Runnable {
-        public Real_Obj cube = new Real_Obj("Cube");
-        public Real_Obj plane = new Real_Obj("Ship");
-        public Real_Obj plane_acc = new Real_Obj("Ship_Accelerating");
-        public Label_Obj crosshair = new Label_Obj("crosshair.png");
+        public Real_Obj cube;
+        public Real_Obj plane;
+        public Real_Obj plane_acc;
+        public Label_Obj crosshair;
 
         public BufferedImage bg_img;
 
-        public Camera camera = new Camera(0, 0, -530);
-        public Camera camera2 = new Camera(0, 100, -3000);
-        public Camera plane_origin = new Camera(0, 0, 0);
+        public Camera camera;
+        public Camera camera2;
+        public Camera plane_origin;
 
         public Scene scene;
 
         public Calc(){
+            cube = new Real_Obj("Cube");
+            plane = new Real_Obj("Ship");
+            plane_acc = new Real_Obj("Ship_Accelerating");
+            crosshair = new Label_Obj("crosshair.png");
+
+            camera = new Camera(0, 0, -530);
+            camera2 = new Camera(0, 100, -3000);
+            plane_origin = new Camera(0, 0, 0);
+
             plane.scale(3);
             plane_acc.scale(3);
-
             crosshair.scale(0.8);
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
 
             try{
-                bg_img = ImageIO.read(new File("star_sky.jpg"));
+                bg_img = ImageIO.read(new File("img/fish_eye_sky.jpg"));
             }
             catch(Exception e){}
 
@@ -380,7 +388,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 }
             }
 
-            scene.rasterize_bg();
             scene.render();
         }
 
