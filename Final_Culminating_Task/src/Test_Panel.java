@@ -44,8 +44,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
 
+            String img_name = "img/fisheye_test1.jpg";
+
             try{
-                bg_img = ImageIO.read(new File("img/fish_eye_sky.jpg"));
+                bg_img = ImageIO.read(new File(img_name));
             }
             catch(Exception e){}
 
@@ -218,11 +220,21 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
 
             if(pressed_keys['l']){
-                cube.scale(zoom);
-
+                scene.adjust_bg_radius(1.01);
             }
             if(pressed_keys['h']){
-                cube.scale(1/zoom);
+                scene.adjust_bg_radius(0.99);
+            }
+            if(pressed_keys['n']){
+                scene.adjust_bg_offset(-1);
+            }
+            if(pressed_keys['m']){
+                scene.adjust_bg_offset(1);
+            }
+            if(pressed_keys['3']){
+                scene.mode++;
+                scene.mode %= 2;
+                System.out.println(scene.mode);
             }
 
 

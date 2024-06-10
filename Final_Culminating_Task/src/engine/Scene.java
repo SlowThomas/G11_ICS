@@ -244,27 +244,39 @@ public class Scene {
                 if(screen.z_buffed[i][j]) continue;
                 Vector pixel_v = camera.z_norm.mult(Consts.distance).add(camera.x_norm.mult((float)((i - screen.width / 2.0) * resolution))).add(camera.y_norm.mult((float)((screen.height / 2.0 - j) * resolution)));
                 double x = pixel_v.at(0), y = pixel_v.at(1), z = pixel_v.at(2);
-                double alpha;
-                if(Math.abs(x) < Consts.epsilon) alpha = Math.PI / 2;
-                else alpha = Math.abs(Math.atan(y / x));
-
                 double xz_mag = Math.sqrt(x * x + z * z);
                 if(xz_mag < Consts.epsilon){
                     screen.colo[i][j] = bg_img.getRGB(m_width, m_height);
                     continue;
                 }
-                double walk = r * (1 - 2 / Math.PI * alpha);
-                // double walk = r * Math.cos(alpha);
 
-                screen.colo[i][j] = bg_img.getRGB(
-                        (int)(m_width + x / xz_mag * walk),
-                        (int)(m_height + z / xz_mag * walk));
+                double alpha = Math.abs(Math.atan(y / xz_mag));
+                double walk = 0;
+
+                switch (mode){
+                    case 0:
+                        walk = r * Math.cos(alpha);
+                        break;
+                    case 1:
+                        walk = r * (1 - 2 / Math.PI * alpha);
+                        break;
+                }
+
+                int coord_x = (int) (m_width + x / xz_mag * walk);
+                int coord_y = (int) (m_height + z / xz_mag * walk);
+                if(coord_x < 0 || coord_x >= bg_img.getWidth() || coord_y < 0 || coord_y >= bg_img.getHeight()) continue;
+
+                screen.colo[i][j] = bg_img.getRGB(coord_x, coord_y);
             }
         }
     }
 
     public void adjust_bg_radius(double n){
         r *= n;
+    }
+
+    public void adjust_bg_offset(double n){
+        offset += n;
     }
 
     public void rasterize_bg(){
@@ -317,7 +329,9 @@ public class Scene {
     private float resolution;
     public BufferedImage canvas;
 
-    private double r;
+    private double r, offset;
+
+    public int mode = 0;
 
     public Scene(int width, int height, float resolution){
         this.width = width;
@@ -329,6 +343,7 @@ public class Scene {
         screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
 
         r = Math.min(screen.width / 2, screen.height / 2);
+        offset = 0;
     }
 
     public void mount_camera(Camera camera){
