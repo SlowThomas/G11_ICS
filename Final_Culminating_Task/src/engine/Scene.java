@@ -242,25 +242,17 @@ public class Scene {
         for(int i = 0; i < screen.width; i++){
             for(int j = 0; j < screen.height; j++){
                 if(screen.z_buffed[i][j]) continue;
-                Vector pixel_v = camera.z_norm.mult(Consts.distance).add(camera.x_norm.mult((float)((i - screen.width / 2.0) * resolution))).add(camera.y_norm.mult((float)((screen.height / 2.0 - j) * resolution)));
+                Vector pixel_v = camera.z_norm.mult(Consts.distance).add(camera.x_norm.mult((float)((i - screen.width / 2.0) / resolution))).add(camera.y_norm.mult((float)((screen.height / 2.0 - j) / resolution)));
                 double x = pixel_v.at(0), y = pixel_v.at(1), z = pixel_v.at(2);
                 double xz_mag = Math.sqrt(x * x + z * z);
+                /*
                 if(xz_mag < Consts.epsilon){
                     screen.colo[i][j] = bg_img.getRGB(m_width, m_height);
                     continue;
-                }
+                }*/
 
-                double alpha = Math.abs(Math.atan(y / xz_mag));
-                double walk = 0;
-
-                switch (mode){
-                    case 0:
-                        walk = r * Math.cos(alpha);
-                        break;
-                    case 1:
-                        walk = r * (1 - 2 / Math.PI * alpha);
-                        break;
-                }
+                double alpha = Math.atan(y / xz_mag);
+                double walk = r * -Math.cos(alpha);
 
                 int coord_x = (int) (m_width + x / xz_mag * walk);
                 int coord_y = (int) (m_height + z / xz_mag * walk);
@@ -330,8 +322,6 @@ public class Scene {
     public BufferedImage canvas;
 
     private double r, offset;
-
-    public int mode = 0;
 
     public Scene(int width, int height, float resolution){
         this.width = width;
