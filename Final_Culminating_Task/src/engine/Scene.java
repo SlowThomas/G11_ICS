@@ -239,9 +239,6 @@ public class Scene {
         int m_width = bg_img.getWidth() / 2;
         int m_height = bg_img.getHeight() / 2;
 
-        // TODO: change image limit
-        int r = Math.min(m_width, m_height);
-
         for(int i = 0; i < screen.width; i++){
             for(int j = 0; j < screen.height; j++){
                 if(screen.z_buffed[i][j]) continue;
@@ -257,12 +254,17 @@ public class Scene {
                     continue;
                 }
                 double walk = r * (1 - 2 / Math.PI * alpha);
+                // double walk = r * Math.cos(alpha);
 
                 screen.colo[i][j] = bg_img.getRGB(
                         (int)(m_width + x / xz_mag * walk),
                         (int)(m_height + z / xz_mag * walk));
             }
         }
+    }
+
+    public void adjust_bg_radius(double n){
+        r *= n;
     }
 
     public void rasterize_bg(){
@@ -315,6 +317,8 @@ public class Scene {
     private float resolution;
     public BufferedImage canvas;
 
+    private double r;
+
     public Scene(int width, int height, float resolution){
         this.width = width;
         this.height = height;
@@ -323,6 +327,8 @@ public class Scene {
         canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         // 800 pixels = 220 mm
         screen = new Screen((int)(width * 0.275 * resolution), (int)(height * 0.275 * resolution));
+
+        r = Math.min(screen.width / 2, screen.height / 2);
     }
 
     public void mount_camera(Camera camera){
