@@ -35,15 +35,6 @@ public class Scene {
     private static class Algorithm {
         private static final float epsilon = Consts.epsilon;
 
-
-        private static float[] barycentric(float x, float y, float[][] triangle){
-            float t = Math.max(epsilon, Math.abs((triangle[0][0] - triangle[2][0]) * (triangle[1][1] - triangle[2][1]) - (triangle[0][1] - triangle[2][1]) * (triangle[1][0] - triangle[2][0])));
-            float l1 = Math.abs((triangle[0][0] - x) * (triangle[1][1] - y) - (triangle[0][1] - y) * (triangle[1][0] - x)) / t;
-            float l2 = Math.abs((triangle[1][0] - x) * (triangle[2][1] - y) - (triangle[1][1] - y) * (triangle[2][0] - x)) / t;
-            float l3 = Math.abs((triangle[2][0] - x) * (triangle[0][1] - y) - (triangle[2][1] - y) * (triangle[0][0] - x)) / t;
-            return new float[]{l1, l2, l3};
-        }
-
         public static boolean edgeFunction(float ax, float ay, float bx, float by, float px, float py) {
             return (px - ax) * (by - ay) - (py - ay) * (bx - ax) >= 0;
         }
@@ -200,42 +191,6 @@ public class Scene {
         }
     }
 
-    private void fisheye_bg(){
-        int m_width = bg_img.getWidth() / 2;
-        int m_height = bg_img.getHeight() / 2;
-
-        for(int i = 0; i < screen.width; i++){
-            for(int j = 0; j < screen.height; j++){
-                if(screen.z_buffed[i][j]) continue;
-                Vector pixel_v = camera.z_norm.mult(Consts.distance).add(camera.x_norm.mult((float)((i - screen.width / 2.0) / resolution))).add(camera.y_norm.mult((float)((screen.height / 2.0 - j) / resolution)));
-                double x = pixel_v.at(0), y = pixel_v.at(1), z = pixel_v.at(2);
-                double xz_mag = Math.sqrt(x * x + z * z);
-                /*
-                if(xz_mag < Consts.epsilon){
-                    screen.colo[i][j] = bg_img.getRGB(m_width, m_height);
-                    continue;
-                }*/
-
-                double alpha = Math.atan(y / xz_mag);
-                double walk = r * -Math.cos(alpha);
-
-                int coord_x = (int) (m_width + x / xz_mag * walk);
-                int coord_y = (int) (m_height + z / xz_mag * walk);
-                if(coord_x < 0 || coord_x >= bg_img.getWidth() || coord_y < 0 || coord_y >= bg_img.getHeight()) continue;
-
-                screen.colo[i][j] = bg_img.getRGB(coord_x, coord_y);
-            }
-        }
-    }
-
-    public void adjust_bg_radius(double n){
-        r *= n;
-    }
-
-    public void adjust_bg_offset(double n){
-        offset += n;
-    }
-
     Vector[] star_field;
 
     public void generate_stars(int n){
@@ -264,7 +219,7 @@ public class Scene {
         }
     }
 
-    private Camera camera;
+    public Camera camera;
 
     private Screen screen;
 
@@ -296,10 +251,6 @@ public class Scene {
         this.camera = camera;
     }
 
-    public void mount_background(BufferedImage img){
-        bg_img = img;
-    }
-
     public void rasterize(Real_Obj obj){
         Algorithm.rasterize(camera, obj, screen, resolution);
     }
@@ -314,7 +265,6 @@ public class Scene {
 
     public void render(){
         // TODO: SSAA with ImgFunc.adjustedColor()
-        // fisheye_bg();
         star_field_bg();
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){

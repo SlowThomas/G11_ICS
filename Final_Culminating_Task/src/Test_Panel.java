@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import algebra.Matrix;
 import algebra.Vector;
 import engine.*;
 
@@ -19,7 +18,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Real_Obj plane_acc;
         public Label_Obj crosshair;
 
-        public BufferedImage bg_img;
+        public BufferedImage red_label;
+        public BufferedImage white_label;
 
         public Camera camera;
         public Camera camera2;
@@ -33,6 +33,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             plane_acc = new Real_Obj("Ship_Accelerating");
             crosshair = new Label_Obj("crosshair.png");
 
+            try{
+                red_label = ImageIO.read(new File("img/red_label.png"));
+                white_label = ImageIO.read(new File("img/white_label.png"));
+            }
+            catch(Exception e){ System.err.println(e.getMessage()); System.exit(1); }
+
             camera = new Camera(0, 0, -530);
             camera2 = new Camera(0, 100, -3000);
             plane_origin = new Camera(0, 0, 0);
@@ -43,15 +49,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
-
-            String img_name = "img/fisheye_sky.jpg";
-
-            try{
-                bg_img = ImageIO.read(new File(img_name));
-            }
-            catch(Exception e){}
-
-            scene.mount_background(bg_img);
         }
 
         public int fps = 0;
@@ -59,8 +56,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public int camera_mode = 0;
 
         public double sensitivity = 0.005;
-
-        public float zoom = 1.1f;
 
         public double mouse_dx;
         public double mouse_dy;
@@ -152,6 +147,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public ListIterator<Enemy_Bullet> enemy_bullet_it;
         public Enemy_Bullet enemy_bullet;
 
+        public float enemy_bullet_speed = 200;
+        public int enemy_bullet_quantity = 5;
         public int enemy_timer = 0;
 
         public int invincible_timer = 0;
@@ -199,39 +196,13 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             if(enemy_timer <= 0 && enemies.size() < 3){
                 enemy_timer = 2000 + 10000 / (score / 10 + 1);
 
-                // TODO: one-liner randomization
-                Vector dir = new Vector(0, 0, 1);
-                float rx = (float) (2 * Math.PI * Math.random());
-                float ry = (float) (2 * Math.PI * Math.random());
-                float a = (float) Math.cos(rx);
-                float b = (float) Math.sin(rx);
-                float c = (float) Math.cos(ry);
-                float d = (float) Math.sin(ry);
-                // TODO: correct matrix
-                /*dir = new Matrix(new float[][]{
-                        {0, 0, 0},
-                        {-b*d, 0, -b*c},
-                        {a*d, 0, a*c}
-                }).dot(dir);*/
-
+                float alpha = (float)(Math.random() * 2 * Math.PI);
+                float beta = (float)(Math.random() * 2 * Math.PI);
+                Vector dir = new Vector((float)(-Math.cos(beta) * Math.sin(alpha)), (float)(-Math.sin(beta)), (float)(Math.cos(alpha) * Math.cos(beta)));
                 dir = dir.mult((float)(Math.random() * 1e2 + 1e4));
                 enemies.add(new Enemy(plane_origin.getPos().add(dir)));
             }
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
-
-            if(pressed_keys['l']){
-                scene.adjust_bg_radius(1.01);
-            }
-            if(pressed_keys['h']){
-                scene.adjust_bg_radius(0.99);
-            }
-            if(pressed_keys['n']){
-                scene.adjust_bg_offset(-1);
-            }
-            if(pressed_keys['m']){
-                scene.adjust_bg_offset(1);
-            }
-
 
             x_norm = plane_origin.x_norm;
             y_norm = plane_origin.y_norm;
@@ -248,6 +219,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 rot_speed_max = 0.1f;
                 rot_acc = adjust(0.01f, time);
             }
+
             if(pressed_keys['w']){
                 if(rot_speed_x < 0) rot_speed_x = 0;
                 rot_speed_x += rot_acc;
@@ -322,7 +294,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                     scene.rasterize(plane);
             }
             scene.rasterize(crosshair);
-            // scene.rasterize(cube);
 
             if(!bullets.isEmpty()){
                 bullet_it = bullets.listIterator();
@@ -344,10 +315,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                     if(enemy.fire_countdown <= 0){
                         enemy.fire_countdown = enemy.fire_time_delta;
                         Vector enemy_bullet_v = plane_origin.getPos().subtract(enemy.pos);
-                        for(int i = 0; i < 3; i++){
+                        for(int i = 0; i < enemy_bullet_quantity; i++){
                             Vector this_bullet_v = enemy_bullet_v.add(velocity.mult((float)Math.random() * 1000));
                             if(this_bullet_v.mag < 1e-11) enemy_bullets.add(new Enemy_Bullet(enemy.pos, this_bullet_v));
-                            else enemy_bullets.add(new Enemy_Bullet(enemy.pos, this_bullet_v.mult(100 / this_bullet_v.mag)));
+                            else enemy_bullets.add(new Enemy_Bullet(enemy.pos, this_bullet_v.mult(enemy_bullet_speed / this_bullet_v.mag)));
                         }
                     }
                     enemy.update(time);
@@ -374,7 +345,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 enemy_bullet_it = enemy_bullets.listIterator();
                 while(enemy_bullet_it.hasNext()){
                     enemy_bullet = enemy_bullet_it.next();
-                    double distance = 140;
+                    double distance = 200;
                     if(
                             invincible_timer == 0 &&
                             enemy_bullet.pos.subtract(plane_origin.getPos()).cross(enemy_bullet.velocity).mag <= enemy_bullet.velocity.mag * distance &&
