@@ -200,41 +200,6 @@ public class Scene {
         }
     }
 
-    public double[] get_angles(Vector v){
-        double x, y;
-        if(Math.abs(v.at(2)) > Consts.epsilon){
-            x = Math.abs(Math.atan(v.at(0) / v.at(2)));
-            y = Math.abs(Math.atan(v.at(1) / v.at(2)));
-        }
-        else{
-            x = Math.PI / 2;
-            y = Math.PI / 2;
-        }
-        if(v.at(0) < 0){
-            if(v.at(2) < 0){
-                x -= Math.PI;
-            }
-            else{
-                x = -x;
-            }
-        }
-        else if(v.at(2) < 0){
-            x = Math.PI - x;
-        }
-        if(v.at(1) < 0){
-            if(v.at(2) < 0){
-                y -= Math.PI;
-            }
-            else{
-                y = -y;
-            }
-        }
-        else if(v.at(2) < 0){
-            y = Math.PI - y;
-        }
-        return new double[]{x, y};
-    }
-
     private void fisheye_bg(){
         int m_width = bg_img.getWidth() / 2;
         int m_height = bg_img.getHeight() / 2;
@@ -271,41 +236,30 @@ public class Scene {
         offset += n;
     }
 
-    public void rasterize_bg(){
-        BufferedImage img = bg_img;
-        if(img == null) return;
-        double[] angles;
+    Vector[] star_field;
 
-        angles = get_angles(camera.z_norm);
+    public void generate_stars(int n){
+        star_field = new Vector[n];
+        for(int i = 0; i < n; i++){
+            float alpha = (float)(Math.random() * 2 * Math.PI);
+            float beta = (float)(Math.random() * 2 * Math.PI);
+            star_field[i] = new Vector((float)(-Math.cos(beta) * Math.sin(alpha)), (float)(-Math.sin(beta)), (float)(Math.cos(alpha) * Math.cos(beta)));
+        }
+    }
 
-        int[] mid = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
-
-        // use top / right position
-        // Slant vector to the top = h * y_norm + d * z_norm
-
-        Vector r_slant = camera.x_norm.mult(screen.width).add(camera.z_norm.mult(Consts.distance * resolution));
-        angles = get_angles(r_slant);
-        int[] right = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
-        Vector t_slant = camera.y_norm.mult(screen.height).add(camera.z_norm.mult(Consts.distance * resolution));
-        angles = get_angles(t_slant);
-        int[] top = {(int)((angles[0] / 2 / Math.PI + 0.5) * img.getWidth()), (int)((angles[1] / 2 / Math.PI + 0.5) * img.getHeight())};
-
-        int[] tr = {top[0] + right[0] - mid[0], top[1] + right[1] - mid[1]};
-        int[] tl = {top[0] - right[0] + mid[0], top[1] - right[1] + mid[1]};
-        int[] br = {-top[0] + right[0] + mid[0], -top[1] + right[1] + mid[1]};
-        double[] ri = {tr[0] - tl[0], tr[1] - tl[1]};
-        double[] rj = {br[0] - tr[0], br[1] - tr[1]};
-
-        double mag_ri = Math.sqrt(ri[0] * ri[0] + ri[1] * ri[1]);
-        double mag_rj = Math.sqrt(rj[0] * rj[0] + rj[1] * rj[1]);
-
-        ri[0] /= mag_ri; ri[1] /= mag_ri;
-        rj[0] /= mag_rj; rj[1] /= mag_rj;
-
-        for(int i = 0; i < screen.width; i++){
-            for(int j = 0; j < screen.height; j++){
-                if(screen.z_buffed[i][j]) continue;
-                screen.colo[i][j] = img.getRGB(((int)(tl[0] + i * ri[0] + j * rj[0]) + img.getWidth()) % img.getWidth(), ((int)(tl[1] + i * ri[1] + j * rj[1]) + img.getHeight()) % img.getHeight());
+    public void star_field_bg(){
+        int r = 3;
+        for(int i = 0; i < star_field.length; i++){
+            double mag = star_field[i].dot(camera.z_norm);
+            if(mag < Consts.epsilon) continue;
+            mag = Consts.distance * resolution / mag;
+            int x = (int)(screen.width / 2.0 + star_field[i].dot(camera.x_norm) * mag);
+            int y = (int)(screen.height / 2.0 - star_field[i].dot(camera.y_norm) * mag);
+            for(int u = x - r; u < x + r; u++){
+                for(int v = y - r; v < y + r; v++){
+                    if(u < 0 || u >= screen.width || v < 0 || v >= screen.height || screen.z_buffed[u][v]) continue;
+                    screen.colo[u][v] = (1 << 24) - 1;
+                }
             }
         }
     }
@@ -334,6 +288,8 @@ public class Scene {
 
         r = Math.min(screen.width / 2, screen.height / 2);
         offset = 0;
+
+        generate_stars(5000);
     }
 
     public void mount_camera(Camera camera){
@@ -358,7 +314,8 @@ public class Scene {
 
     public void render(){
         // TODO: SSAA with ImgFunc.adjustedColor()
-        fisheye_bg();
+        // fisheye_bg();
+        star_field_bg();
         for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
                 canvas.setRGB(x, y, screen.colo[x * screen.width / width][y * screen.height / height]);
