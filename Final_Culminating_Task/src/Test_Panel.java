@@ -453,6 +453,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         g.drawString("score: " + calc.score, 10, 50);
         g.drawString("life: " + calc.life, 10, 70);
 
+        g.setColor(new Color(50, 50, 50));
+        g.drawArc(getWidth() / 2 - 200, getHeight() / 2 - 200, 400, 400, 0, 360);
+
         if(calc.score != last_score) notification_countdown = 60;
         if(notification_countdown > 0){
             g.setColor(new Color(255, 0, 0));
