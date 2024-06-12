@@ -17,6 +17,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Real_Obj plane;
         public Real_Obj plane_acc;
 
+        public Flat_Obj enemy_proto;
+        public Flat_Obj bullet_proto;
+        public Flat_Obj enemy_bullet_proto;
+
         public Label_Obj crosshair;
         public Label_Obj origin_label;
         public Label_Obj enemy_label;
@@ -33,6 +37,12 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             plane.scale(3);
             plane_acc = new Real_Obj("Ship_Accelerating");
             plane_acc.scale(3);
+
+            enemy_proto = new Flat_Obj("ghost_red.png");
+            bullet_proto = new Flat_Obj("Bullet.png");
+            bullet_proto.scale(0.5);
+            enemy_bullet_proto = new Flat_Obj("purple_lightning.png");
+            enemy_bullet_proto.scale(2);
 
             crosshair = new Label_Obj("crosshair.png");
             crosshair.scale(0.8);
@@ -78,54 +88,44 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Vector z_norm;
 
         public static class Bullet{
-            public Flat_Obj obj = new Flat_Obj("Bullet.png");
             public Vector pos;
             public Vector velocity;
             public long time = 5000; // bullet life
 
             public Bullet(Vector pos, Vector velocity){
-                obj.scale(0.5);
-                obj.cd(pos);
                 this.pos = pos;
                 this.velocity = velocity;
             }
 
             public void update(long delta){
                 time -= delta;
-                obj.move(velocity.mult(delta / 50f));
-                pos = obj.getPos();
+                pos = pos.add(velocity.mult(delta / 50f));
             }
         }
 
         public static class Enemy_Bullet{
-            public Flat_Obj obj = new Flat_Obj("purple_lightning.png");
             public Vector pos;
             public Vector velocity;
             public long time = 10000; // bullet life
 
             public Enemy_Bullet(Vector pos, Vector velocity){
-                obj.scale(2);
-                obj.cd(pos);
                 this.pos = pos;
                 this.velocity = velocity;
             }
 
             public void update(long delta){
                 time -= delta;
-                obj.move(velocity.mult(delta / 50f));
-                pos = obj.getPos();
+                pos = pos.add(velocity.mult(delta / 50f));
             }
         }
 
         public static class Enemy{
-            public Flat_Obj obj = new Flat_Obj("ghost_red.png");
             public Vector pos;
             public long fire_time_delta = 7000;
             public long fire_countdown = fire_time_delta;
 
             public Enemy(Vector pos){
-                obj.cd(pos);
-                this.pos = obj.getPos();
+                this.pos = pos;
             }
 
             public void update(long delta){
@@ -188,8 +188,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         }
 
         public void epoch(long time){
-            fps = (int)(1000f / time + 0.5);
-
             // Generate enemy
             if(enemy_timer <= 0 && enemies.size() < 3){
                 enemy_timer = 2000 + 10000 / (score / 10 + 1);
@@ -197,7 +195,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 float alpha = (float)(Math.random() * 2 * Math.PI);
                 float beta = (float)(Math.random() * 2 * Math.PI);
                 Vector dir = new Vector((float)(-Math.cos(beta) * Math.sin(alpha)), (float)(-Math.sin(beta)), (float)(Math.cos(alpha) * Math.cos(beta)));
-                dir = dir.mult((float)(Math.random() * 1e2 + 1e4));
+                dir = dir.mult((float)(Math.random() * 1e5 + 1e4));
                 enemies.add(new Enemy(plane_origin.getPos().add(dir)));
             }
             if(enemy_timer > 0){ enemy_timer -= (int) time;}
@@ -205,8 +203,6 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
             x_norm = plane_origin.x_norm;
             y_norm = plane_origin.y_norm;
             z_norm = plane_origin.z_norm;
-            crosshair.cd(plane.getPos());
-            crosshair.move(z_norm.mult(10000f)); // 100 meters
 
 
             if(camera_mode == 0){
@@ -284,6 +280,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(pressed_keys[' '] || pressed_keys['k']) shoot();
 
+            crosshair.cd(plane.getPos());
+            crosshair.move(z_norm.mult(10000f)); // 100 meters
+
             // ------------------------- rasterization ------------------------------
             scene.rasterize_indicator(origin_label);
 
@@ -304,7 +303,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                         continue;
                     }
                     bullet.update(time);
-                    scene.rasterize(bullet.obj);
+                    bullet_proto.cd(bullet.pos);
+                    scene.rasterize(bullet_proto);
                 }
             }
 
@@ -323,7 +323,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                     }
                     enemy.update(time);
                     enemy_label.cd(enemy.pos);
-                    scene.rasterize(enemy.obj);
+                    enemy_proto.cd(enemy.pos);
+                    scene.rasterize(enemy_proto);
                     scene.rasterize_indicator(enemy_label);
                     if(!bullets.isEmpty()){
                         bullet_it = bullets.listIterator();
@@ -364,7 +365,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                         continue;
                     }
                     enemy_bullet.update(time);
-                    scene.rasterize(enemy_bullet.obj);
+                    enemy_bullet_proto.cd(enemy_bullet.pos);
+                    scene.rasterize(enemy_bullet_proto);
                 }
             }
 
@@ -381,12 +383,15 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                 time = end - start;
                 start = end;
                 if(time <= update_time){
+                    fps = (int)(1000f / update_time + 0.5);
                     try { Thread.sleep(update_time - time); }
                     catch(Exception e){}
                     epoch(update_time);
                 }
                 else{
-                    epoch(time);
+                    fps = (int)(1000f / time + 0.5);
+                    // epoch(time);
+                    epoch(update_time);
                 }
                 end = System.currentTimeMillis();
             }
