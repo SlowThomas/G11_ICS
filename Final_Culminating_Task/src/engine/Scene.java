@@ -189,6 +189,55 @@ public class Scene {
                 }
             }
         }
+
+        public static int[] indicator_boundaryFunction(int x, int y, Screen screen){
+            // Use a circle as boundary
+            double radius = 300;
+            double mag = Math.sqrt(Math.pow(x - screen.width / 2.0, 2) + Math.pow(y - screen.height / 2.0, 2));
+            if(mag > radius) {
+                x = (int) ((x - screen.width / 2.0) / mag * radius + screen.width / 2.0 + 0.5);
+                y = (int) ((y - screen.height / 2.0) / mag * radius + screen.height / 2.0 + 0.5);
+            }
+            return new int[]{x, y};
+        }
+
+        public static void rasterize_indicator(Camera camera, Label_Obj obj, Screen screen, float resolution){
+            Vector visual = obj.getPos().subtract(camera.getPos());
+            int x, y;
+            double x_dot = visual.dot(camera.x_norm), y_dot = visual.dot(camera.y_norm), z_dot = Math.abs(visual.dot(camera.z_norm));
+            if(z_dot > epsilon) {
+                x = (int) (screen.width / 2.0 + x_dot * Consts.distance * resolution / z_dot);
+                y = (int) (screen.height / 2.0 - y_dot * Consts.distance * resolution / z_dot);
+            }
+            else{
+                if(x_dot > epsilon) x = screen.width;
+                else if(x_dot < -epsilon) x = 0;
+                else x = screen.width / 2;
+
+                if(y_dot > epsilon) y = screen.height;
+                else if(y_dot < -epsilon) y = 0;
+                else y = screen.height / 2;
+            }
+
+            int[] pixel_pos = indicator_boundaryFunction(x, y, screen);
+
+            int l = (int)(pixel_pos[0] - obj.img.getWidth() * resolution / 5 * obj.scale / 2.0);
+            int r = l + (int)(obj.img.getWidth() * resolution / 5 * obj.scale);
+            int t = (int)(pixel_pos[1] - obj.img.getHeight() * resolution / 5 * obj.scale / 2.0);
+            int b = t + (int)(obj.img.getHeight() * resolution / 5 * obj.scale);
+
+            if(r < 0 || l >= screen.width || b < 0 || t >= screen.height) return;
+
+            for(int i = l; i < r; i++){
+                for(int j = t; j < b; j++){
+                    int color = ImgFunc.adjustedColor(obj.img_buffer, r - l, b - t, i - l, j - t);
+                    if(i < 0 || j < 0 || i >= screen.width || j >= screen.height || color >>> 24 == 0) continue;
+                    screen.colo[i][j] = color;
+                    screen.z_buffed[i][j] = true;
+                    screen.z_buffer[i][j] = 0;
+                }
+            }
+        }
     }
 
     Vector[] star_field;
@@ -261,6 +310,10 @@ public class Scene {
 
     public void rasterize(Label_Obj obj){
         Algorithm.rasterize(camera, obj, screen, resolution);
+    }
+
+    public void rasterize_indicator(Label_Obj obj){
+        Algorithm.rasterize_indicator(camera, obj, screen, resolution);
     }
 
     public void render(){

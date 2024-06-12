@@ -16,10 +16,10 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Real_Obj cube;
         public Real_Obj plane;
         public Real_Obj plane_acc;
-        public Label_Obj crosshair;
 
-        public BufferedImage red_label;
-        public BufferedImage white_label;
+        public Label_Obj crosshair;
+        public Label_Obj origin_label;
+        public Label_Obj enemy_label;
 
         public Camera camera;
         public Camera camera2;
@@ -30,22 +30,20 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         public Calc(){
             cube = new Real_Obj("Cube");
             plane = new Real_Obj("Ship");
+            plane.scale(3);
             plane_acc = new Real_Obj("Ship_Accelerating");
-            crosshair = new Label_Obj("crosshair.png");
+            plane_acc.scale(3);
 
-            try{
-                red_label = ImageIO.read(new File("img/red_label.png"));
-                white_label = ImageIO.read(new File("img/white_label.png"));
-            }
-            catch(Exception e){ System.err.println(e.getMessage()); System.exit(1); }
+            crosshair = new Label_Obj("crosshair.png");
+            crosshair.scale(0.8);
+            origin_label = new Label_Obj("white_label.png");
+            origin_label.scale(0.5);
+            enemy_label = new Label_Obj("red_label.png");
+            enemy_label.scale(0.5);
 
             camera = new Camera(0, 0, -530);
             camera2 = new Camera(0, 100, -3000);
             plane_origin = new Camera(0, 0, 0);
-
-            plane.scale(3);
-            plane_acc.scale(3);
-            crosshair.scale(0.8);
 
             scene = new Scene(800, 450, 5);
             scene.mount_camera(camera2);
@@ -286,6 +284,8 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
             if(pressed_keys[' '] || pressed_keys['k']) shoot();
 
+            // ------------------------- rasterization ------------------------------
+            scene.rasterize_indicator(origin_label);
 
             if(camera_mode != 0){
                 if(accelerating)
@@ -322,7 +322,9 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
                         }
                     }
                     enemy.update(time);
+                    enemy_label.cd(enemy.pos);
                     scene.rasterize(enemy.obj);
+                    scene.rasterize_indicator(enemy_label);
                     if(!bullets.isEmpty()){
                         bullet_it = bullets.listIterator();
                         while(bullet_it.hasNext()) {
