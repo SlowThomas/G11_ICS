@@ -52,17 +52,19 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             return false;
         }
 
-        public void save() throws IOException{
-            PrintWriter fout = new PrintWriter(new FileWriter("data/record.txt"));
-            for(int i = 0; i < 3 && scores[i] != -1; i++){
-                fout.println(scores[i] + " " + survived[i]);
+        public void save(){
+            try{
+                PrintWriter fout = new PrintWriter(new FileWriter("data/records.txt"));
+                for(int i = 0; i < 3 && scores[i] != -1; i++){
+                    fout.println(scores[i] + " " + survived[i]);
+                }
+                fout.close();
             }
-            fout.close();
+            catch(Exception e){ System.err.println(e.getMessage()); }
         }
     }
 
     public static class Calc implements Runnable {
-        public Real_Obj cube;
         public Real_Obj plane;
         public Real_Obj plane_acc;
 
@@ -191,7 +193,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
 
 
         public Calc(){
-            cube = new Real_Obj("Cube");
             plane = new Real_Obj("Ship");
             plane.scale(3);
             plane_acc = new Real_Obj("Ship_Accelerating");
@@ -620,6 +621,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             game_state = 5;
             score = calc.score;
             new_high = record_board.record(score, false);
+            record_board.save();
             end_game();
             return;
         }
@@ -628,6 +630,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             game_state = 6;
             score = calc.score;
             new_high = record_board.record(score, true);
+            record_board.save();
             end_game();
             return;
         }
