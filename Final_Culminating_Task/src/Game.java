@@ -135,7 +135,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         public static class Bullet{
             public Vector pos;
             public Vector velocity;
-            public long time = 5000; // bullet life
+            public long time = 10000; // bullet life
 
             public Bullet(Vector pos, Vector velocity){
                 this.pos = pos;
@@ -151,16 +151,25 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         public static class Enemy_Bullet{
             public Vector pos;
             public Vector velocity;
+            public Vector original_velocity;
+            public float velocity_mag = 1000;
             public long time = 10000; // bullet life
 
             public Enemy_Bullet(Vector pos, Vector velocity){
                 this.pos = pos;
                 this.velocity = velocity;
+                original_velocity = velocity;
             }
 
-            public void update(long delta){
+            public void update(long delta, Camera plane_origin){
                 time -= delta;
                 pos = pos.add(velocity.mult(delta / 50f));
+                if(velocity.dot(original_velocity) > 1e-10){
+                    velocity = velocity.add(plane_origin.getPos().subtract(pos).mult(1f / 1000f));
+                    if(velocity.mag > velocity_mag){
+                        velocity = velocity.mult(velocity_mag / velocity.mag);
+                    }
+                }
             }
         }
 
@@ -168,7 +177,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             public Vector pos;
             public long fire_time_delta = 7000;
             public float bullet_speed = 500;
-            public int bullet_quantity = 10;
+            public int bullet_quantity = 5;
             public long fire_countdown = fire_time_delta;
 
             public Enemy(Vector pos){
@@ -244,6 +253,16 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             else if(camera_mode == 1){
                 rot_speed_max = 0.1f;
                 rot_acc = adjust(0.01f, time);
+            }
+
+            if(score < 2){
+                enemy_amount = 1;
+            }
+            else if(score < 5){
+                enemy_amount = 2;
+            }
+            else{
+                enemy_amount = 3;
             }
 
             // Generate enemy
@@ -378,7 +397,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                 enemy_bullet_it = enemy_bullets.listIterator();
                 while(enemy_bullet_it.hasNext()){
                     enemy_bullet = enemy_bullet_it.next();
-                    double distance = 200;
+                    double distance = 150;
                     if(
                             invincible_timer == 0 &&
                                     enemy_bullet.pos.subtract(plane_origin.getPos()).cross(enemy_bullet.velocity).mag <= enemy_bullet.velocity.mag * distance &&
@@ -394,7 +413,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
                         enemy_bullet_it.remove();
                         continue;
                     }
-                    enemy_bullet.update(time);
+                    enemy_bullet.update(time, plane_origin);
                 }
             }
 
@@ -450,6 +469,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             }
         }
     }
+
     public Robot automation;
     public Cursor blankCursor;
 
@@ -485,7 +505,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     private final BufferedImage rules_screen;
     private final BufferedImage controls_screen;
     private final BufferedImage credits_screen;
-    private final BufferedImage in_game_placeholder;
     private final BufferedImage game_over_screen;
     private final BufferedImage special_ending_screen;
     private final BufferedImage records_screen;
@@ -515,7 +534,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         rules_screen = ImageIO.read(new File("img/Rules.png"));
         controls_screen = ImageIO.read(new File("img/Controls.png"));
         credits_screen = ImageIO.read(new File("img/Credits.png"));
-        in_game_placeholder = ImageIO.read(new File("img/In Game Sample.png"));
         game_over_screen = ImageIO.read(new File("img/Game_Over.png"));
         special_ending_screen = ImageIO.read(new File("img/Survival.png"));
         records_screen = ImageIO.read(new File("img/Records.png"));
@@ -557,7 +575,6 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
             g.drawImage(credits_screen, 0, 0, null);
         }
         else if(game_state == 4){
-            g.drawImage(in_game_placeholder, 0, 0, null);
             in_game_event_handler(g);
         }
         else if(game_state == 5){
