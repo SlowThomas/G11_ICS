@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import javax.imageio.ImageIO;
 import java.awt.event.*;
+import java.util.Scanner;
 
 public class Game extends JPanel implements Runnable, KeyListener, MouseListener{
     // Useless Methods
@@ -12,6 +13,73 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     public void mouseReleased(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
+
+    private static class Record_Board {
+        public int[] scores = new int[3];
+        public boolean[] survived = new boolean[3];
+
+        public Record_Board() throws IOException {
+            Scanner fin = new Scanner(new File("data/records.txt"));
+            for(int i = 0; i < 3; i++){
+                if(!fin.hasNextInt()) {
+                    scores[i] = -1;
+                    continue;
+                }
+                scores[i] = fin.nextInt();
+                survived[i] = fin.nextBoolean();
+            }
+            fin.close();
+        }
+
+        public String get_score(int idx){
+            if(scores[idx] == -1) {
+                return "-";
+            }
+            return "" + scores[idx];
+        }
+
+        public boolean record(int score, boolean survived){ // returns whether new record is achieved
+            for(int i = 0; i < 3; i++){
+                if(scores[i] < score || scores[i] == score && !this.survived[i] && survived){
+                    for(int j = 2; j > i; j--){
+                        scores[j] = scores[j - 1];
+                        this.survived[j] = this.survived[j - 1];
+                    }
+                    scores[i] = score;
+                    this.survived[i] = survived;
+                    return i == 0;
+                }
+            }
+            return false;
+        }
+
+        public void save() throws IOException{
+            PrintWriter fout = new PrintWriter(new FileWriter("data/record.txt"));
+            for(int i = 0; i < 3 && scores[i] != -1; i++){
+                fout.println(scores[i] + " " + survived[i]);
+            }
+            fout.close();
+        }
+    }
+
+
+    // Assets
+    private final BufferedImage main_screen;
+    private final BufferedImage rules_screen;
+    private final BufferedImage controls_screen;
+    private final BufferedImage credits_screen;
+    private final BufferedImage in_game_placeholder;
+    private final BufferedImage game_over_screen;
+    private final BufferedImage special_ending_screen;
+    private final BufferedImage records_screen;
+
+    // System Stats
+    private int game_state = 0;
+    private final boolean[] pressed_keys = new boolean['z' + 1];
+
+    private final Record_Board record_board;
+    private int score;
+    private boolean new_high;
 
 
     public Game() throws IOException{
@@ -33,27 +101,11 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         game_over_screen = ImageIO.read(new File("img/Game_Over.png"));
         special_ending_screen = ImageIO.read(new File("img/Survival.png"));
         records_screen = ImageIO.read(new File("img/Records.png"));
+
+        record_board = new Record_Board();
     }
 
 
-
-    // Assets
-    private final BufferedImage main_screen;
-    private final BufferedImage rules_screen;
-    private final BufferedImage controls_screen;
-    private final BufferedImage credits_screen;
-    private final BufferedImage in_game_placeholder;
-    private final BufferedImage game_over_screen;
-    private final BufferedImage special_ending_screen;
-    private final BufferedImage records_screen;
-
-    // System Stats
-    private int game_state = 0;
-    private final boolean[] pressed_keys = new boolean['z' + 1];
-
-    private final Record_Board record_board = new Record_Board();
-    private int score;
-    private boolean new_high;
 
     // Input Handling
     public void keyPressed(KeyEvent e) { if(e.getKeyChar() <= 'z') pressed_keys[e.getKeyChar()] = true; }
