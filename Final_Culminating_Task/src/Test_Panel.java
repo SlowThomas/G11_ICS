@@ -72,7 +72,7 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
 
         // --------------------------- parameters -----------------------------
 
-        public int update_time = 50;
+        public long update_time = 20;
 
         public double sensitivity = 0.005;
         public float acc = 2f;
@@ -161,15 +161,11 @@ public class Test_Panel extends JPanel implements Runnable, KeyListener, MouseLi
         }
 
         public float adjust(float n, long time){
-            // default for n is unit per 50 millisecond
-            return n * time / 50f;
-            // return n;
+            return n * time / 1000f * update_time;
         }
 
         public Vector adjust(Vector v, long time){
-            // default for n is unit per 50 millisecond
-            return v.mult(time / 50f);
-            // return v;
+            return v.mult(time / 1000f * update_time);
         }
 
         public void rotate(Vector axis, float angle){
