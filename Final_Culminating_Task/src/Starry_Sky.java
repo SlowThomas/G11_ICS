@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Scanner;
 
-public class Game extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
+public class Starry_Sky extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
     private static class Record_Board {
         public int[] scores = new int[3];
@@ -519,7 +519,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     private boolean new_high;
 
 
-    public Game() throws IOException, AWTException {
+    public Starry_Sky() throws IOException, AWTException {
         setPreferredSize(new Dimension(800, 450));
         // Add KeyListener
         this.setFocusable(true);
@@ -650,7 +650,7 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
         g.setColor(new Color(50, 50, 50));
         g.drawArc(getWidth() / 2 - 200, getHeight() / 2 - 200, 400, 400, 0, 360);
 
-        if(calc.score != last_score) notification_countdown = 60;
+        if(calc.score > last_score) notification_countdown = 60;
         if(notification_countdown > 0){
             g.setColor(new Color(255, 0, 0));
             g.drawString("Eliminated", 350, 70);
@@ -660,8 +660,8 @@ public class Game extends JPanel implements Runnable, KeyListener, MouseListener
     }
 
     public static void main(String[] args) throws IOException, AWTException{
-        JFrame frame = new JFrame("Lesson 9 - Gravity");
-        Game panel = new Game();
+        JFrame frame = new JFrame("Starry Sky");
+        Starry_Sky panel = new Starry_Sky();
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
