@@ -669,6 +669,7 @@ public class Starry_Sky extends JPanel implements Runnable, KeyListener, MouseLi
         JFrame frame = new JFrame("Starry Sky");
         Starry_Sky panel = new Starry_Sky();
         frame.add(panel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
